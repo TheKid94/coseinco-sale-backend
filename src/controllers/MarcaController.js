@@ -17,6 +17,26 @@ const getAll = (req, res)=>{
             marcas
         });
     });
-}
+};
 
-module.exports = { getAll };
+const getOne = (req, res) =>{
+    const id = req.params.id;
+    Marca.findById(id,(err,marca)=>{
+        if(err){
+            return res.status(500).json({
+                message: `Error al realizar la petición: ${err}`
+            })
+        }
+        if(!marca){
+            return res.status(404).json({
+                message: 'No existe la marca'
+            })
+        }
+        res.status(200).json({
+            status: 'success',
+            marca
+        });
+    });
+};
+
+module.exports = { getAll, getOne };
