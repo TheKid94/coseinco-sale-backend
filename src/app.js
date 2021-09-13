@@ -9,6 +9,7 @@ const AppError = require('./utils/appError');
 const productoRoutes = require('./routes/ProductoRoutes');
 const marcaRoutes = require('./routes/MarcaRoutes');
 const pedidoRoutes = require( './routes/PedidoRoutes' );
+const detallePedidosRoutes = require('./routes/DetallePedidoRoutes');
 
 
 const app = express();
@@ -25,6 +26,7 @@ app.use(express.urlencoded({limit: '50mb', parameterLimit: 100000, extended: tru
 app.use('/api/productos', productoRoutes);
 app.use('/api/marcas', marcaRoutes);
 app.use('/api/pedidos',pedidoRoutes);
+app.use('/api/detallePedido',detallePedidosRoutes);
 
 //Routes - Admin
 
