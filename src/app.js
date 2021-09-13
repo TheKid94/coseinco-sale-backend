@@ -8,6 +8,7 @@ const AppError = require('./utils/appError');
 // Routes summon
 const productoRoutes = require('./routes/ProductoRoutes');
 const marcaRoutes = require('./routes/MarcaRoutes');
+const pedidoRoutes = require( './routes/PedidoRoutes' );
 
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(express.urlencoded({limit: '50mb', parameterLimit: 100000, extended: tru
 //Routes - Cliente
 app.use('/api/productos', productoRoutes);
 app.use('/api/marcas', marcaRoutes);
+app.use('/api/pedidos',pedidoRoutes);
 
 //Routes - Admin
 
