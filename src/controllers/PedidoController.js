@@ -45,5 +45,5 @@ const getOne = (req, res) => {
 
 module.exports={
     getAll,
-    getOne,
+    getOne
 }

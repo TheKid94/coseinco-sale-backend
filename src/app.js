@@ -10,6 +10,8 @@ const productoRoutes = require('./routes/ProductoRoutes');
 const marcaRoutes = require('./routes/MarcaRoutes');
 const pedidoRoutes = require( './routes/PedidoRoutes' );
 const detallePedidosRoutes = require('./routes/DetallePedidoRoutes');
+const usuarioRoutes = require('./routes/UsuarioRoutes');
+
 
 
 const app = express();
@@ -27,6 +29,7 @@ app.use('/api/productos', productoRoutes);
 app.use('/api/marcas', marcaRoutes);
 app.use('/api/pedidos',pedidoRoutes);
 app.use('/api/detallePedido',detallePedidosRoutes);
+app.use('/api/Usuario', usuarioRoutes);
 
 //Routes - Admin
 
