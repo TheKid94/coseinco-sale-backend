@@ -7,7 +7,7 @@ const Pedido = new Schema({
     precioVenta: Number,
     tipoPago: String,
     observacion: String,
-    datos: [
+    datos: 
         {
             name: String,
             lastName: String,
@@ -20,8 +20,7 @@ const Pedido = new Schema({
             departamento: String, 
             provincia: String,
             distrito: String, 
-        }
-    ],
+        },
     estado: String,
 });
 

@@ -11,7 +11,7 @@ const marcaRoutes = require('./routes/MarcaRoutes');
 const pedidoRoutes = require( './routes/PedidoRoutes' );
 const detallePedidosRoutes = require('./routes/DetallePedidoRoutes');
 const usuarioRoutes = require('./routes/UsuarioRoutes');
-
+const categoriaRoutes = require('./routes/CategoriaRoutes');
 
 
 const app = express();
@@ -30,6 +30,7 @@ app.use('/api/marcas', marcaRoutes);
 app.use('/api/pedidos',pedidoRoutes);
 app.use('/api/detallePedido',detallePedidosRoutes);
 app.use('/api/Usuario', usuarioRoutes);
+app.use('/api/categorias', categoriaRoutes);
 
 //Routes - Admin
 
