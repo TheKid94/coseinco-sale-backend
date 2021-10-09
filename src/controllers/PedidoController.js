@@ -62,7 +62,7 @@ const createPedido = async(req,res)=>{
             });
             return false;
         }
-        newPedido.codigoPedido = "P" + `${pedidos.length+1}`.padStart(5,"0");
+        newPedido.codigoPedido = "P" + `${nPedidos.length+1}`.padStart(5,"0");
         newPedido.fechaRegistro = Date.now();
         newPedido.fechaEntrega = new Date(Date.now() + 2);
         for(var i=0; i<productos.length; i++){
@@ -81,7 +81,6 @@ const createPedido = async(req,res)=>{
             items.push(itemproducto);
         }
         newPedido.precioVenta = total;
-        newPedido.tipoPago = "Tarjeta";
         newPedido.observacion = "No hay observaciones";
         newPedido.estado = "generado";
         newPedido.datos = datos;
@@ -89,7 +88,7 @@ const createPedido = async(req,res)=>{
         newDetallePedido.pedidoID = pedido._id;
         newDetallePedido.productos = items;
         newDetallePedido.totalPrecio = total;
-        const dePedido = await detallePedido.create(newDetallePedido);
+        const dePedido = await DetallePedido.create(newDetallePedido);
         const productosped = dePedido.productos;
         res.status(200).json({
             status: 'success',
@@ -111,13 +110,13 @@ const adminCambioEstado = async(req, res) =>{
             newestado = "reservado";
             break;
         case "reservado":
-            newestado = "a Enviar";
+            newestado = "empaquetado";
             break;
-        case "a Enviar":
-            newestado = "Enviado";
+        case "empaquetado":
+            newestado = "enviado";
             break;
-        case "Enviado":
-            newestado = "Finalizado";
+        case "enviado":
+            newestado = "finalizado";
             break;
         default:
             newestado = pedido.estado;
@@ -135,9 +134,45 @@ const adminCambioEstado = async(req, res) =>{
     }
 }
 
+const getPedidoParaReservar = async(req,res)=>{
+    let pedidos = await Pedido.find({});
+    let pedidosres = [];
+    try{
+        if(!pedidos){
+            return res.status(404).json({
+                message: 'No existen los pedidos'
+            })
+        }
+        for(var i=0; i<pedidos.length;i++){
+            let pedidoaux = new Object();
+            let cantidades = 0;
+            pedidoaux.id = pedidos[i]._id;
+            pedidoaux.codigo = pedidos[i].codigoPedido;
+            pedidoaux.cliente = pedidos[i].datos;
+            let detallPedido = await DetallePedido.findOne({pedidoID:pedidos[i]._id});
+            for(var j=0;j<detallPedido.productos.length;j++){
+                cantidades += detallPedido.productos[j].cantidad;
+            }
+            pedidoaux.cantidad = cantidades;
+            pedidoaux.fechaRegistro = pedidos[i].fechaRegistro;
+            pedidoaux.estado = pedidos[i].estado;
+            pedidosres.push(pedidoaux);
+        }
+        res.status(200).json({
+            status: 'success',
+            pedidosres
+        })
+    }catch(error){
+        res.status(500).json({
+            error
+        })
+    }
+}
+
 module.exports={
     getAll,
     getOne,
     createPedido,
-    adminCambioEstado
+    adminCambioEstado,
+    getPedidoParaReservar
 }

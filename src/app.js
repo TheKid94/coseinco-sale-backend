@@ -12,7 +12,7 @@ const pedidoRoutes = require( './routes/PedidoRoutes' );
 const detallePedidosRoutes = require('./routes/DetallePedidoRoutes');
 const usuarioRoutes = require('./routes/UsuarioRoutes');
 const categoriaRoutes = require('./routes/CategoriaRoutes');
-
+const inventarioRoutes = require('./routes/InventarioRoutes');
 
 const app = express();
 require('./database');
@@ -33,6 +33,8 @@ app.use('/api/Usuario', usuarioRoutes);
 app.use('/api/categorias', categoriaRoutes);
 
 //Routes - Admin
+app.use('/api-admin/inventario', inventarioRoutes);
+
 
 //Error in case there is no route
 app.use('*', (req, res, next) => {
