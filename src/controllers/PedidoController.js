@@ -169,10 +169,20 @@ const getPedidoParaReservar = async(req,res)=>{
     }
 }
 
+const getPedidoReservabyId = async(req,res)=>{
+    let id = req.body.id;
+    res.status(200).json({
+        status:'success',
+        id
+    })
+}
+
+
 module.exports={
     getAll,
     getOne,
     createPedido,
     adminCambioEstado,
-    getPedidoParaReservar
+    getPedidoParaReservar,
+    getPedidoReservabyId
 }

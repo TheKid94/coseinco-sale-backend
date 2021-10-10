@@ -6,6 +6,7 @@ router.route('/').get(pedidoController.getAll);
 router.route('/getPedido/:id').get(pedidoController.getOne);
 router.route('/create').post(pedidoController.createPedido);
 
+router.route('/getPedidoReservabyID').post(pedidoController.getPedidoReservabyId);
 router.route('/admin/reservas').get(pedidoController.getPedidoParaReservar);
 
 
