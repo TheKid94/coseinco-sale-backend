@@ -1,21 +1,21 @@
-const Categoria = require('../models/Categoria');
+const OCompra = require('../models/OCompra');
 
 const getAll = (req, res) => {
-    Categoria.find({},(err, categorias) =>{
+    OCompra.find({},(err, compras) =>{
         if(err){
             return res.status(500).json({
                 message: `Error al realizar la peticion: ${err}`
             })
         }
 
-        if(!categorias){
+        if(!compras){
             return res.status(404).json({
-                message: 'No existen las categorias'
+                message: 'No existen las ordenes de compra'
             })
         }
         res.status(200).json({
             status: 'success',
-            categorias
+            compras
         });
     });
 }
@@ -23,46 +23,48 @@ const getAll = (req, res) => {
 const getOne = (req, res) => {
 
     const id = req.params.id;
-    Categoria.findById(id,(err,categoria)=>{
+    OCompra.findById(id,(err,compra)=>{
         if(err){
             return res.status(500).json({
                 message: `Error al realizar la peticion ${err}`
             })
         }
-        if(!categoria){
+        if(!compra){
             return res.status(404).json({
-                message: 'No existe la categoria'
+                message: 'No existe la orden de compra'
             })
         }
         res.status(200).json({
             status: 'success',
-            categoria
+            compra
         });
     });
 
 };
 
-const createCategoria = async(req,res)=>{
+const createOCompra = async(req, res) =>{
     try{
-        const categoria = req.body.categoria;
-        if(Object.keys(categoria).length == 0){
+        const ocompra = req.body.ocompra;
+        if(Object.keys(ocompra).length == 0){
             return res.status(400).json({
                 status: 'warning',
-                status: 'Debe ingresar un categoria correcta'
+                status: 'Debe ingresar una orden de compra correcta'
             });
         }
-        const categoriares = await Categoria.create(categoria);
+        const ocomprares = await OCompra.create(ocompra)
         res.status(200).json({
             status: 'success',
-            categoriares
+            ocomprares
         })
     }catch(error){
         res.status(500).json({
-            message: `Error al realizar la peticion ${err}`
+            error
         })
     }
 }
 
-module.exports ={
-    getAll,getOne,createCategoria
+module.exports = {
+    getAll,
+    getOne,
+    createOCompra
 }

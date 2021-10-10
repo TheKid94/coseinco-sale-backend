@@ -1,21 +1,21 @@
-const Categoria = require('../models/Categoria');
+const Proveedor = require('../models/Proveedor');
 
 const getAll = (req, res) => {
-    Categoria.find({},(err, categorias) =>{
+    Proveedor.find({},(err, proveedores) =>{
         if(err){
             return res.status(500).json({
                 message: `Error al realizar la peticion: ${err}`
             })
         }
 
-        if(!categorias){
+        if(!proveedores){
             return res.status(404).json({
-                message: 'No existen las categorias'
+                message: 'No existen los proveedores'
             })
         }
         res.status(200).json({
             status: 'success',
-            categorias
+            proveedores
         });
     });
 }
@@ -23,46 +23,49 @@ const getAll = (req, res) => {
 const getOne = (req, res) => {
 
     const id = req.params.id;
-    Categoria.findById(id,(err,categoria)=>{
+    Proveedor.findById(id,(err,proveedor)=>{
         if(err){
             return res.status(500).json({
                 message: `Error al realizar la peticion ${err}`
             })
         }
-        if(!categoria){
+        if(!proveedor){
             return res.status(404).json({
-                message: 'No existe la categoria'
+                message: 'No existe la proveedor'
             })
         }
         res.status(200).json({
             status: 'success',
-            categoria
+            proveedor
         });
     });
 
 };
 
-const createCategoria = async(req,res)=>{
+const createProveedor = async(req,res) =>{
     try{
-        const categoria = req.body.categoria;
-        if(Object.keys(categoria).length == 0){
+        const proveedor = req.body.proveedor;
+        if(Object.keys(proveedor).length == 0){
             return res.status(400).json({
                 status: 'warning',
-                status: 'Debe ingresar un categoria correcta'
+                status: 'Debe ingresar un proveedor correcto'
             });
         }
-        const categoriares = await Categoria.create(categoria);
+        const proveres = await Proveedor.create(proveedor)
         res.status(200).json({
             status: 'success',
-            categoriares
+            proveres
         })
     }catch(error){
         res.status(500).json({
-            message: `Error al realizar la peticion ${err}`
+            error
         })
     }
 }
 
-module.exports ={
-    getAll,getOne,createCategoria
+
+module.exports = {
+    getAll,
+    getOne,
+    createProveedor
 }
