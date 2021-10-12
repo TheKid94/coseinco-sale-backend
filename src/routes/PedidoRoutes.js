@@ -1,4 +1,5 @@
 const { Router } = require( 'express' );
+const { registerCustomQueryHandler } = require('puppeteer');
 const router = Router();
 const pedidoController = require('../controllers/PedidoController')
 
@@ -8,6 +9,6 @@ router.route('/create').post(pedidoController.createPedido);
 
 router.route('/getPedidoReservabyID').post(pedidoController.getPedidoReservabyId);
 router.route('/admin/reservas').get(pedidoController.getPedidoParaReservar);
-
+router.route('/admin/getPedidoReservaConsulta').post(pedidoController.getPedidoReservaConsulta);
 
 module.exports = router;
