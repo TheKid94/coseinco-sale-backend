@@ -12,6 +12,7 @@ const pedidoRoutes = require( './routes/PedidoRoutes' );
 const detallePedidosRoutes = require('./routes/DetallePedidoRoutes');
 const usuarioRoutes = require('./routes/UsuarioRoutes');
 const categoriaRoutes = require('./routes/CategoriaRoutes');
+const rolRoutes = require('./routes/RolRoutes');
 const inventarioRoutes = require('./routes/InventarioRoutes');
 const proveedorRoutes = require('./routes/ProveedorRoutes');
 const oCompraRoutes = require('./routes/OCompraRoutes');
@@ -34,6 +35,7 @@ app.use('/api/pedidos',pedidoRoutes);
 app.use('/api/detallePedido',detallePedidosRoutes);
 app.use('/api/Usuario', usuarioRoutes);
 app.use('/api/categorias', categoriaRoutes);
+app.use('/api/roles', rolRoutes);
 
 //Routes - Admin
 app.use('/api-admin/inventario', inventarioRoutes);
