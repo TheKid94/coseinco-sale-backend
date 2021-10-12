@@ -171,12 +171,44 @@ const getPedidoParaReservar = async(req,res)=>{
 
 const getPedidoReservabyId = async(req,res)=>{
     let id = req.body.id;
-    res.status(200).json({
-        status:'success',
-        id
-    })
-}
 
+    if(Object.keys(id).length == 0)
+    {
+        res.status(400).json({
+            status: 'error'
+        });
+        return false;
+    }
+
+    try
+    {
+
+        let pedido = await Pedido.findById(id); 
+
+        if(!pedido)
+        {
+            return res.status(404).json({
+                message: 'No existe el pedido'
+            })
+        }
+
+        let detallePedido = await DetallePedido.findOne({pedidoID: id});         
+      
+        res.status(200).json({
+            status: 'success',
+            pedido,
+            productos: detallePedido.productos
+            
+        })
+    }
+    catch(error)
+    {
+        res.status(500).json({
+            error
+        })
+    }
+   
+}
 
 module.exports={
     getAll,
