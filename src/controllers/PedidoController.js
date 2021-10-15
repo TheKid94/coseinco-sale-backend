@@ -184,5 +184,6 @@ module.exports={
     createPedido,
     adminCambioEstado,
     getPedidoParaReservar,
-    getPedidoReservabyId
+    getPedidoReservabyId,
+    getPedidoReservaConsulta
 }
