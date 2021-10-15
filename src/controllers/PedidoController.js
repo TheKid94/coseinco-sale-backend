@@ -236,26 +236,6 @@ const getPedidoReservabyId = async(req,res)=>{
    
 }
 
-<<<<<<< HEAD
-const getPedidoReservabyId = async(req,res)=>{
-    let id = req.body.id;
-    res.status(200).json({
-        status:'success',
-        id
-    })
-}
-
-
-module.exports={
-    getAll,
-    getOne,
-    createPedido,
-    adminCambioEstado,
-    getPedidoParaReservar,
-    getPedidoReservabyId,
-    getPedidoReservaConsulta
-}
-=======
 module.exports = {
   getAll,
   getOne,
@@ -265,4 +245,3 @@ module.exports = {
   getPedidoReservabyId,
   getPedidoReservaConsulta,
 };
->>>>>>> 9abf82f648c1603591afd5d6e3010e0216ad41d8

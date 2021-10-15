@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 
 // Error Handler
 const globalErrHandler = require('./controllers/errorController');
@@ -23,7 +24,7 @@ const app = express();
 require('./database');
 
 
-
+app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json({limit:'50mb'}));
 app.use(express.urlencoded({limit: '50mb', parameterLimit: 100000, extended: true }));
