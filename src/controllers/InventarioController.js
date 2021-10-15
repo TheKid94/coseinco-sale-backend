@@ -1,7 +1,7 @@
 const Inventario = require('../models/Inventario');
 const Producto = require('../models/Producto');
 
-const getInventariobyProductId = async(req,res) => {
+const getSeriesByProductId = async(req,res) => {
     let id = req.params.id;
     try{
         let inventario = await Inventario.findOne({productID:id});
@@ -12,7 +12,7 @@ const getInventariobyProductId = async(req,res) => {
         }
         res.status(200).json({
             status: 'success',
-            inventario
+            nSeries: inventario.nSerie
         })
     }catch(err){
         return res.status(500).json({
@@ -22,5 +22,5 @@ const getInventariobyProductId = async(req,res) => {
 }
 
 module.exports ={
-    getInventariobyProductId
+    getSeriesByProductId
 }
