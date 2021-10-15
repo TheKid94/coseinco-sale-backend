@@ -197,7 +197,6 @@ const getPedidoReservaConsulta = async (req, res) => {
 
 const getPedidoReservabyId = async(req,res)=>{
     let id = req.body.id;
-
     if(Object.keys(id).length == 0)
     {
         res.status(400).json({
@@ -208,9 +207,7 @@ const getPedidoReservabyId = async(req,res)=>{
 
     try
     {
-
-        let pedido = await Pedido.findById(id); 
-
+        let pedido = await Pedido.findOne({codigo: id}); 
         if(!pedido)
         {
             return res.status(404).json({
@@ -218,13 +215,12 @@ const getPedidoReservabyId = async(req,res)=>{
             })
         }
 
-        let detallePedido = await DetallePedido.findOne({pedidoID: id});         
+        let detallePedido = await DetallePedido.findOne({pedidoID: pedido._id});         
       
         res.status(200).json({
             status: 'success',
             pedido,
             productos: detallePedido.productos
-            
         })
     }
     catch(error)
