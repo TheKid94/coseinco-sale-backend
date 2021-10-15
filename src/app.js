@@ -12,9 +12,11 @@ const pedidoRoutes = require( './routes/PedidoRoutes' );
 const detallePedidosRoutes = require('./routes/DetallePedidoRoutes');
 const usuarioRoutes = require('./routes/UsuarioRoutes');
 const categoriaRoutes = require('./routes/CategoriaRoutes');
+const rolRoutes = require('./routes/RolRoutes');
 const inventarioRoutes = require('./routes/InventarioRoutes');
 const proveedorRoutes = require('./routes/ProveedorRoutes');
 const oCompraRoutes = require('./routes/OCompraRoutes');
+const guiaRoutes = require('./routes/GuiaRoutes');
 
 
 const app = express();
@@ -34,11 +36,13 @@ app.use('/api/pedidos',pedidoRoutes);
 app.use('/api/detallePedido',detallePedidosRoutes);
 app.use('/api/Usuario', usuarioRoutes);
 app.use('/api/categorias', categoriaRoutes);
+app.use('/api/roles', rolRoutes);
 
 //Routes - Admin
 app.use('/api-admin/inventario', inventarioRoutes);
 app.use('/api-admin/proveedor', proveedorRoutes);
 app.use('/api-admin/oCompra', oCompraRoutes);
+app.use('/api-admin/guia', guiaRoutes); 
 
 
 //Error in case there is no route
