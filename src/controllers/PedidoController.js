@@ -207,7 +207,7 @@ const getPedidoReservabyId = async(req,res)=>{
 
     try
     {
-        let pedido = await Pedido.findOne({codigo: id}); 
+        let pedido = await Pedido.findOne({codigoPedido: id}); 
         if(!pedido)
         {
             return res.status(404).json({
