@@ -9,7 +9,23 @@ const getGuiabyId = async (req, res) => {
     return url; 
 }
 
-module.exports = {
+const createGuia = async(req, res) => {
+    let pedidoscod = req.body.codigo;
+    let productos = req.body.productos;
+    let nseries = [];
+    let guia = new Object();
+    for(var i=0;i<productos.length;i++){
+        nseries.push(productos[i]);
+    }
+    guia.pedidoID = pedidoscod;
+    guia.nseries = nseries;
+    let guiares = await Guia.create(guia);
+    res.status(200).json({
+        guiares
+    })
+}
 
-    getGuiabyId
+module.exports = {
+    getGuiabyId,
+    createGuia
 }

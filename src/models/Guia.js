@@ -11,6 +11,8 @@ const Guia = new Schema({
         type: String, 
         default: "" 
     }
+},{
+    versionKey:false
 });
 
 module.exports = model('Guia', Guia, 'Guia');
