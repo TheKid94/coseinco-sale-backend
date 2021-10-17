@@ -19,6 +19,7 @@ const getGuiaInfo = async (req, res) => {
         }
         res.status(200).json({
             status: 'success',
+            codigo,
             productores
         })
     }catch(error){
