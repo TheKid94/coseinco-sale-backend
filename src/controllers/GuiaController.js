@@ -111,7 +111,7 @@ const createGuiaPDF = async(req, res) =>{
             let year = date.getFullYear();
             reshtml = reshtml.replace('#CodGuia',guia.codigoGuia);
             reshtml = reshtml.replace('#FechaRegistro', `${day}/${month}/${year}`);
-            reshtml = reshtml.replace('#Cliente',pedido.datos.name);
+            reshtml = reshtml.replace('#Cliente',pedido.datos.name + " " + pedido.datos.lastname);
             reshtml = reshtml.replace('#CorreoCliente',`${pedido.datos.email}`);
             reshtml = reshtml.replace('#CodigoPedido',`${pedido.codigoPedido}`);
             for(var i=0; i<guia.nseries.length;i++){
