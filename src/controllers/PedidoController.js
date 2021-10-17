@@ -2,6 +2,7 @@ const Pedido = require("../models/Pedido");
 const Producto = require("../models/Producto");
 const Marca = require("../models/Marca");
 const DetallePedido = require("../models/DetallePedido");
+const Guia = require("../models/Guia");
 
 const getAll = (req, res) => {
   Pedido.find({}, (err, pedidos) => {
@@ -155,6 +156,9 @@ const getPedidoParaReservar = async (req, res) => {
       pedidoaux.cantidad = cantidades;
       pedidoaux.fechaRegistro = pedidos[i].fechaRegistro;
       pedidoaux.estado = pedidos[i].estado;
+      let guiaaux = await Guia.findOne({codigoPedido: pedidos[i].codigoPedido});
+      let url = (!guiaaux) ? "":guiaaux.url;
+      pedidoaux.url = url;
       pedidosres.push(pedidoaux);
     }
     res.status(200).json({
@@ -167,33 +171,6 @@ const getPedidoParaReservar = async (req, res) => {
     });
   }
 };
-//-----------------------
-const getPedidoReservaConsulta = async (req, res) => {
-  let id = req.body.id;
-  
-  try {
-    let pedido = await Pedido.findOne({ _id: id });
-    if (!pedido) {
-        return res.status(404).json({
-          message: "No existe el pedido",
-        });
-      }  
-    let detallPedido = await DetallePedido.findOne({ pedidoID: id });
-     
-    res.status(200).json({
-        status: "success",
-        pedido,
-        productos:detallPedido.productos
-      });
-  } catch (error) {
-    res.status(500).json({
-      error,
-    });
-  }
- 
-};
-//------------------------
-
 
 const getPedidoReservabyId = async(req,res)=>{
     let id = req.body.id;
@@ -239,6 +216,5 @@ module.exports = {
   createPedido,
   adminCambioEstado,
   getPedidoParaReservar,
-  getPedidoReservabyId,
-  getPedidoReservaConsulta,
+  getPedidoReservabyId
 };

@@ -1,3 +1,18 @@
+const fs = require('fs');
+const path = require('path');
+const utils = require('util');
+const puppeteer = require('puppeteer');
+const hb = require('handlebars');
+const readFile = utils.promisify(fs.readFile);
+
+const cloudinary = require('cloudinary');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 const Guia = require("../models/Guia");
 const Inventario = require("../models/Inventario");
 const Pedido = require("../models/Pedido");
@@ -46,7 +61,9 @@ const createGuia = async(req, res) => {
             nseries.push(productos[i]);
         };
         await Pedido.findOneAndUpdate({codigoPedido:pedidoscod},{"estado":"reservado"});
+        let nGuias = await Guia.find({});
         guia.codigoPedido = pedidoscod;
+        guia.codigoGuia = "G" + `${nGuias.length + 1}`.padStart(5, "0");
         guia.nseries = nseries;
         let guiares = await Guia.create(guia);
         res.status(200).json({
@@ -77,7 +94,90 @@ const transformDifference = (myArray, toRemove)=>{
     }
     return myArray;
 }
+
+
+const createGuiaPDF = async(req, res) =>{
+    let codigoped = req.body.codigo;
+    try{
+        let guia = await Guia.findOne({codigoPedido: codigoped});
+        let pedido = await Pedido.findOne({codigoPedido: codigoped});
+        let data = {};
+        await getTemplateHtml().then(async (resp)=>{
+            let prod = "";
+            let reshtml = resp;
+            let date = new Date();
+            let day = date.getDate();
+            let month = date.getMonth() + 1;
+            let year = date.getFullYear();
+            reshtml = reshtml.replace('#CodGuia',guia.codigoGuia);
+            reshtml = reshtml.replace('#FechaRegistro', `${day}/${month}/${year}`);
+            reshtml = reshtml.replace('#Cliente',pedido.datos.name);
+            reshtml = reshtml.replace('#CorreoCliente',`${pedido.datos.email}`);
+            reshtml = reshtml.replace('#CodigoPedido',`${pedido.codigoPedido}`);
+            for(var i=0; i<guia.nseries.length;i++){
+                let producto = await Producto.findById(guia.nseries[i].productoID);
+                prod += '<tr class="item">';
+                prod += `<td>${producto.nombre}</td>`;
+                prod += `<td style="text-align: left !important;">${producto.SKU}</td>`;
+                prod += `<td>${guia.nseries[i].serialNumbers.length}</td>`;
+                prod += '<td>';
+                for(var j=0;j<guia.nseries[i].serialNumbers.length;j++){
+                    prod += guia.nseries[i].serialNumbers[j];
+                    prod += (j == guia.nseries[i].serialNumbers.length - 1)?"":"; ";
+                };
+                prod += '</td>';
+                prod += '</tr>';
+            }
+            reshtml = reshtml.replace('#Productos', prod);
+            const template = hb.compile(reshtml, { strict: true });
+            let result = template(data);
+            let html = result;
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.setContent(html);
+            let pathfile = `src/public/${guia.codigoGuia}.pdf`;
+            await page.pdf({ path: pathfile, format: 'A4' });
+            const resultcloud = await cloudinary.v2.uploader.upload(pathfile,{folder:`Coseinco/Guia/${guia.codigoGuia}`});
+            await browser.close();
+            fs.unlink(pathfile,(err)=>{
+                if(err){
+                    res.status(500).json({
+                        error: err
+                    })
+                };
+            })
+            await Guia.findOneAndUpdate({codigoPedido: codigoped},{"url": resultcloud.url})
+            await Pedido.findOneAndUpdate({codigoPedido: codigoped},{"estado": "empaquetado"})
+            res.status(200).json({
+                status: 'success'
+            })
+        }).catch(err => {
+            res.status(500).json({
+                error: err
+            })
+            console.error(err);
+        });
+    }catch(error){
+        res.status(500).json({
+            error: error
+        })
+    }
+}
+
+async function getTemplateHtml() {
+    
+    console.log("Loading template file in memory")
+    try {
+    const invoicePath = path.resolve("src/public/templates/guia.html");
+    return await readFile(invoicePath, 'utf8');
+    } catch (err) {
+    return Promise.reject("Could not load html template");
+    }
+    
+}
+
 module.exports = {
     getGuiaInfo,
-    createGuia
+    createGuia,
+    createGuiaPDF
 }

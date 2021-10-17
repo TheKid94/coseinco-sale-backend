@@ -2,6 +2,7 @@ const { Schema, model } = require('mongoose');
 
 const Guia = new Schema({
     codigoPedido: String,
+    codigoGuia: String,
     nseries: Array,
     empleadoID: {
         type: String, 

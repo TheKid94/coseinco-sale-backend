@@ -9,6 +9,5 @@ router.route('/create').post(pedidoController.createPedido);
 
 router.route('/getPedidoReservabyID').post(pedidoController.getPedidoReservabyId);
 router.route('/admin/reservas').get(pedidoController.getPedidoParaReservar);
-router.route('/admin/getPedidoReservaConsulta').post(pedidoController.getPedidoReservaConsulta);
 
 module.exports = router;
