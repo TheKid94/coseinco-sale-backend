@@ -1,14 +1,31 @@
 const Guia = require("../models/Guia");
 const Inventario = require("../models/Inventario");
 const Pedido = require("../models/Pedido");
+const Producto = require("../models/Producto");
 
-const getGuiabyId = async (req, res) => {
-
-    let id = req.params.id; 
-    let guia = await Guia.findById(id);
-    let url = guia.url; 
-
-    return url; 
+const getGuiaInfo = async (req, res) => {
+    let codigo = req.body.codigo;
+    let productores = [];
+    try{
+        let guia = await Guia.findOne({codigoPedido: codigo});
+        for(let i=0;i<guia.nseries.length;i++){
+            let product = new Object();
+            let prod = await Producto.findById(guia.nseries[i].productoID);
+            product.SKU = prod.SKU;
+            product.nombre = prod.nombre;
+            product.cantidad = guia.nseries[i].serialNumbers.length;
+            product.nseries = guia.nseries[i].serialNumbers;
+            productores.push(product);
+        }
+        res.status(200).json({
+            status: 'success',
+            productores
+        })
+    }catch(error){
+        res.status(500).json({
+            error: error
+        })
+    }
 }
 
 const createGuia = async(req, res) => {
@@ -60,6 +77,6 @@ const transformDifference = (myArray, toRemove)=>{
     return myArray;
 }
 module.exports = {
-    getGuiabyId,
+    getGuiaInfo,
     createGuia
 }
