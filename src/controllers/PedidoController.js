@@ -69,7 +69,7 @@ const createPedido = async (req, res) => {
       (itemproducto.productoID = productos[i]._id),
         (itemproducto.nombre = producto.nombre);
       itemproducto.marca = marcatemp.nombre;
-      itemproducto.SKU = producto.codigoInterno;
+      itemproducto.SKU = producto.SKU;
       (itemproducto.cantidad = productos[i].cantidad),
         (itemproducto.preciounitario = producto.precio);
       itemproducto.subtotal = productos[i].cantidad * producto.precio;
