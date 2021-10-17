@@ -11,7 +11,7 @@ const getGuiaInfo = async (req, res) => {
         for(let i=0;i<guia.nseries.length;i++){
             let product = new Object();
             let prod = await Producto.findById(guia.nseries[i].productoID);
-            product.SKU = prod.SKU;
+            product.sku = prod.SKU;
             product.nombre = prod.nombre;
             product.cantidad = guia.nseries[i].serialNumbers.length;
             product.nseries = guia.nseries[i].serialNumbers;

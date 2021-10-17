@@ -6,7 +6,7 @@ const Producto = new Schema({
     precio: Number,
     stock: Number,
     codigoFabricante: String,
-    sku: String,
+    SKU: String,
     imagenes: Array,
     caracteristica: String
 });
