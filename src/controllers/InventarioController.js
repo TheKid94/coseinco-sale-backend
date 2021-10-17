@@ -4,7 +4,7 @@ const Producto = require('../models/Producto');
 const getSeriesByProductId = async(req,res) => {
     let id = req.params.id;
     try{
-        let inventario = await Inventario.findOne({productID:id});
+        let inventario = await Inventario.findOne({productoID:id});
         if(!inventario){
             return res.status(404).json({
                 message: 'No existe'
