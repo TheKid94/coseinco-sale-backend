@@ -19,7 +19,30 @@ const getAll = (req, res)=>{
     });
 };
 
+const getAllProductoCompra = async (req, res) => {
+    let productos = [];
+    try{
+        let productList = await Producto.find({});
+        for(var i=0;i<productList.length;i++){
+            let productAux = new Object();
+            productAux.id = productList[i]._id;
+            productAux.nombre = productList[i].nombre;
+            productAux.precioCompra = productList[i].precioCompra;
+            productAux.imagen = productList[i].imagenes[0];
+            productos.push(productAux);
+        }
+        res.status(200).json({
+            status:'success',
+            productos
+        })
+    }catch(err){
+        res.status(500).json({
+            error: err
+        })
+    }
+}
 
 module.exports ={
-    getAll
+    getAll,
+    getAllProductoCompra
 }

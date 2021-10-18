@@ -18,6 +18,8 @@ const Usuario = new Schema({
     rolID : String, 
     password : String, 
     datos : Datos   
+},{
+    versionKey: false
 });
 
 module.exports = model('Usuario', Usuario, 'Usuario');  

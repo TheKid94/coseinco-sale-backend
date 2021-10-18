@@ -6,6 +6,7 @@ const OCompra = new Schema({
     estado: String,
     cantidad: Number,
     total: Number,
+    productos: Array,
     fechaRegistro: Date,
     fechaEntrega: Date
 },{

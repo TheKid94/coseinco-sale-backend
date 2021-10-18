@@ -63,6 +63,7 @@ const createOCompra = async(req, res) =>{
     }
 }
 
+
 module.exports = {
     getAll,
     getOne,
