@@ -4,10 +4,12 @@ const OCompra = new Schema({
     numeroOC: String,
     proveedorID: String,
     estado: String,
-    cantidad: Number,
     total: Number,
     productos: Array,
-    fechaRegistro: Date,
+    fechaRegistro: {
+        type: Date,
+        default: Date.now()
+    },
     fechaEntrega: Date
 },{
     versionKey: false

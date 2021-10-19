@@ -43,22 +43,34 @@ const getOne = (req, res) => {
 };
 
 const createOCompra = async(req, res) =>{
+    const ocompra = req.body.ocompra;
+    if(Object.keys(ocompra).length == 0){
+        return res.status(400).json({
+            status: 'warning',
+            mensaje: 'Debe ingresar una orden de compra correcta'
+        });
+    }
     try{
-        const ocompra = req.body.ocompra;
-        if(Object.keys(ocompra).length == 0){
-            return res.status(400).json({
-                status: 'warning',
-                status: 'Debe ingresar una orden de compra correcta'
-            });
+        let compraux = new Object;
+        let total = 0.00; 
+        let nCompras = await OCompra.find({});
+        for(var i=0;i<ocompra.productos.length;i++){
+            total += ocompra.productos[i].subtotal;
         }
-        const ocomprares = await OCompra.create(ocompra)
+        compraux.numeroOC = "OC" + `${nCompras.length + 1}`.padStart(5, "0");
+        compraux.productos = ocompra.productos;
+        compraux.total = total;
+        compraux.fechaEntrega = ocompra.fechaEntrega;
+        compraux.proveedorID = ocompra.proveedorID;
+        compraux.estado = "generado";
+        const ocomprares = await OCompra.create(compraux)
         res.status(200).json({
             status: 'success',
             ocomprares
         })
-    }catch(error){
+    }catch(err){
         res.status(500).json({
-            error
+            error:err
         })
     }
 }
