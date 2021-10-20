@@ -43,6 +43,7 @@ const getOne = async (req, res) => {
         for(var i=0;i<compraaux.productos.length;i++){
             let producto = new Object()
             let productoaux = await Producto.findById(compraaux.productos[i].id);
+            producto.productoId = productoaux._id;
             producto.SKU = productoaux.SKU;
             producto.nombre = productoaux.nombre;
             producto.imagen = productoaux.imagenes[0];
@@ -119,9 +120,8 @@ const enviarNotificacion = async (req,res) => {
         const msg = {
             to: proveedor.correo, // Change to your recipient
             from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
-            subject: 'Sending with SendGrid is Fun',
-            text: 'and easy to do anywhere, even with Node.js',
-            html: '<strong>Dale a este link mongol</strong>' + '<br>' +'<a href='+'www.google.com'+'>Click aqui</a>',
+            subject: `Generación de Orden de Compra ${compra.numeroOC}`,
+            html: '<strong>Buen día '+ proveedor.razonSocial + ', para aprobar esta orden de compra.</strong>' + '<br>' +'<a href='+'www.google.com'+'>Click aqui</a>',
         }
         sgMail
         .send(msg)
