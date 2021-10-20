@@ -1,5 +1,27 @@
 const Producto = require('../models/Producto');
 
+const getOne = (req, res) => {
+
+    const id = req.params.id;
+    Producto.findById(id,(err,producto)=>{
+        if(err){
+            return res.status(500).json({
+                message: `Error al realizar la peticion ${err}`
+            })
+        }
+        if(!producto){
+            return res.status(404).json({
+                message: 'No existe el producto'
+            })
+        }
+        res.status(200).json({
+            status: 'success',
+            compra
+        });
+    });
+
+};
+
 const getAll = (req, res)=>{
     Producto.find({},(err, products)=>{
         if(err){
@@ -44,5 +66,6 @@ const getAllProductoCompra = async (req, res) => {
 
 module.exports ={
     getAll,
-    getAllProductoCompra
+    getAllProductoCompra,
+    getOne
 }
