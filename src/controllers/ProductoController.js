@@ -41,6 +41,25 @@ const getAll = (req, res)=>{
     });
 };
 
+const productoCarrito = async (req, res, next) => {
+    try{
+        const productoid = req.body.productoid;
+        let carritoProducto = [];
+        for(i=0;i<productoid.length;i++){
+            let producto = await Producto.findById(productoid[i]);
+            carritoProducto.push(producto);
+        };
+        res.status(200).json({
+            status: 'success',
+            result: carritoProducto.length,
+            carritoProducto
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 const getAllProductoCompra = async (req, res) => {
     let productos = [];
     try{
@@ -67,5 +86,6 @@ const getAllProductoCompra = async (req, res) => {
 module.exports ={
     getAll,
     getAllProductoCompra,
-    getOne
+    getOne,
+    productoCarrito
 }
