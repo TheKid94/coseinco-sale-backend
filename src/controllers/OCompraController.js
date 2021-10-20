@@ -1,45 +1,47 @@
 const OCompra = require('../models/OCompra');
+const Proveedor = require('../models/Proveedor');
 
-const getAll = (req, res) => {
-    OCompra.find({},(err, compras) =>{
-        if(err){
-            return res.status(500).json({
-                message: `Error al realizar la peticion: ${err}`
-            })
-        }
-
-        if(!compras){
-            return res.status(404).json({
-                message: 'No existen las ordenes de compra'
-            })
-        }
-        res.status(200).json({
-            status: 'success',
-            compras
-        });
-    });
+const getAll = async (req, res) => {
+   let oCompras = await OCompra.find({});
+   let compras = [];
+   try{
+       for(var i=0; i<oCompras.length; i++){
+           let compraaux = new Object();
+           let proveedor = await Proveedor.findById(oCompras[i].proveedorID);
+           compraaux.id = oCompras[i]._id;
+           compraaux.numeroOC = oCompras[i].numeroOC;
+           compraaux.estado = oCompras[i].estado;
+           compraaux.total = oCompras[i].total;
+           compraaux.fechaEntrega = oCompras[i].fechaEntrega;
+           compraaux.proveedor = proveedor.razonSocial;
+           compras.push(compraaux);
+       }
+       res.status(200).json({
+           status: 'success',
+           compras
+       })
+   }catch(err){
+       res.status(500).json({
+           error: err
+       })
+   }
 }
 
-const getOne = (req, res) => {
-
+const getOne = async (req, res) => {
     const id = req.params.id;
-    OCompra.findById(id,(err,compra)=>{
-        if(err){
-            return res.status(500).json({
-                message: `Error al realizar la peticion ${err}`
-            })
-        }
-        if(!compra){
-            return res.status(404).json({
-                message: 'No existe la orden de compra'
-            })
-        }
+    try{
+        let compra = await OCompra.findById(id);
+        let proveedor = await Proveedor.findById(compra.proveedorID);
         res.status(200).json({
-            status: 'success',
-            compra
-        });
-    });
-
+            status:'success',
+            compra,
+            proveedor
+        })
+    }catch(err){
+        res.status(500).json({
+            error: err
+        })
+    }
 };
 
 const createOCompra = async(req, res) =>{
