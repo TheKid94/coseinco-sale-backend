@@ -47,7 +47,7 @@ const getOne = async (req, res) => {
             productos.push(producto);
         };
         compra.productos = productos;
-        let proveedor = await Proveedor.findById(compra.proveedorID);
+        let proveedor = await Proveedor.findById(compraaux.proveedorID);
         res.status(200).json({
             status:'success',
             compra,
