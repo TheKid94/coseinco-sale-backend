@@ -1,5 +1,6 @@
 const OCompra = require('../models/OCompra');
 const Proveedor = require('../models/Proveedor');
+const Producto = require('../models/Producto');
 
 const getAll = async (req, res) => {
    let oCompras = await OCompra.find({});
@@ -29,8 +30,23 @@ const getAll = async (req, res) => {
 
 const getOne = async (req, res) => {
     const id = req.params.id;
+    let productos =[];
     try{
-        let compra = await OCompra.findOne({numeroOC:id});
+        let compra = new Object();
+        let compraaux = await OCompra.findOne({numeroOC:id});
+        compra.numeroOC = compraaux.numeroOC;
+        compra.total = compraaux.total;
+        for(var i=0;i<compraaux.productos.length;i++){
+            let producto = new Object()
+            let productoaux = await Producto.findById(compraaux.productos[i].id);
+            producto.SKU = productoaux.SKU;
+            producto.nombre = productoaux.nombre;
+            producto.imagen = productoaux.imagenes[0];
+            producto.cantidad = compraaux.productos[i].cantidad;
+            producto.subtotal = compraaux.productos[i].subtotal;
+            productos.push(producto);
+        };
+        compra.productos = productos;
         let proveedor = await Proveedor.findById(compra.proveedorID);
         res.status(200).json({
             status:'success',
