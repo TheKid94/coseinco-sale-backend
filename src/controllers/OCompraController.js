@@ -30,7 +30,7 @@ const getAll = async (req, res) => {
 const getOne = async (req, res) => {
     const id = req.params.id;
     try{
-        let compra = await OCompra.findById(id);
+        let compra = await OCompra.findOne({numeroOC:id});
         let proveedor = await Proveedor.findById(compra.proveedorID);
         res.status(200).json({
             status:'success',
