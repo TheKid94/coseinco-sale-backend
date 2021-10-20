@@ -2,6 +2,10 @@ const OCompra = require('../models/OCompra');
 const Proveedor = require('../models/Proveedor');
 const Producto = require('../models/Producto');
 
+const sgMail = require('@sendgrid/mail');
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 const getAll = async (req, res) => {
    let oCompras = await OCompra.find({});
    let compras = [];
@@ -93,9 +97,27 @@ const createOCompra = async(req, res) =>{
     }
 }
 
+const anularOCompra = async (req, res) => {
+    let id = req.body.id;
+    try{
+        await OCompra.updateOne({numeroOC: id},{estado:"anulado"});
+        res.status(200).json({
+            status: 'success'
+        })
+    }catch(err){
+        res.status(500).json({
+            error:err
+        })
+    }
+}
+
+const enviarNotificacion = async (req,res) => {
+    let id = req.body.id;
+}
 
 module.exports = {
     getAll,
     getOne,
-    createOCompra
+    createOCompra,
+    anularOCompra
 }
