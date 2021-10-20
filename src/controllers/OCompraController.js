@@ -112,12 +112,40 @@ const anularOCompra = async (req, res) => {
 }
 
 const enviarNotificacion = async (req,res) => {
-    let id = req.body.id;
+    let ncompra = req.body.ncompra;
+    try{
+        let compra = await OCompra.findOne({numeroOC:ncompra});
+        let proveedor = await Proveedor.findById(compra.proveedorID);
+        const msg = {
+            to: proveedor.correo, // Change to your recipient
+            from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
+            subject: 'Sending with SendGrid is Fun',
+            text: 'and easy to do anywhere, even with Node.js',
+            html: '<strong>Dale a este link mongol</strong>' + '<br>' +'<a href='+'www.google.com'+'>Click aqui</a>',
+        }
+        sgMail
+        .send(msg)
+        .then(() => {
+            res.status(200).json({
+                status: 'success',
+            });
+        })
+        .catch((error) => {
+            res.status(401).json({
+                error: error,
+            });
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: error,
+        });
+    }
 }
 
 module.exports = {
     getAll,
     getOne,
     createOCompra,
-    anularOCompra
+    anularOCompra,
+    enviarNotificacion
 }
