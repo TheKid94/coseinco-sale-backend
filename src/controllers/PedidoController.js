@@ -67,12 +67,12 @@ const createPedido = async (req, res) => {
       let producto = await Producto.findById(productos[i]._id);
       let marcatemp = await Marca.findById(producto.marcaID);
       let itemproducto = new Object();
-      (itemproducto.productoID = productos[i]._id),
-        (itemproducto.nombre = producto.nombre);
+      itemproducto.productoID = productos[i]._id,
+      itemproducto.nombre = producto.nombre;
       itemproducto.marca = marcatemp.nombre;
       itemproducto.SKU = producto.SKU;
-      (itemproducto.cantidad = productos[i].cantidad),
-        (itemproducto.preciounitario = producto.precio);
+      itemproducto.cantidad = parseInt(productos[i].cantidad),
+      itemproducto.preciounitario = producto.precio;
       itemproducto.subtotal = productos[i].cantidad * producto.precio;
       itemproducto.imagen = producto.imagenes[0];
       total += itemproducto.subtotal;
