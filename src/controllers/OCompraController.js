@@ -1,6 +1,7 @@
 const OCompra = require('../models/OCompra');
 const Proveedor = require('../models/Proveedor');
 const Producto = require('../models/Producto');
+const Inventario = require('../models/Inventario');
 
 const sgMail = require('@sendgrid/mail');
 
@@ -142,10 +143,53 @@ const enviarNotificacion = async (req,res) => {
     }
 }
 
+const oCompraToInventario = async(req,res) =>{
+    let codigoCompra = req.body.codigo;
+    let productos = req.body.productos;
+    try{
+        for(var i=0;i<productos.length;i++){
+            let inventario = await Inventario.findOne({productoID: productos[i].productoID});
+            let invstock = inventario.nSerie;
+            let nseries = [];
+            for(var j=0; j<productos[i].serialNumbers.length;j++){
+                nseries.push(productos[i].serialNumbers[j]);
+            }
+            let newseries = invstock.concat(nseries);
+            let newStock = newseries.length;
+            await Inventario.findOneAndUpdate({productoID: productos[i].productoID},{stock:newStock, nSerie:newseries});
+        }
+        await OCompra.findOneAndUpdate({numeroOC:codigoCompra},{estado:"finalizado"});
+        res.status(200).json({
+            status: 'success'
+        })
+    }catch(err){
+        res.status(500).json({
+            error: err
+        });
+    }
+}
+
+const oCompraAcceptByProveedor = async(req,res)=>{
+    let codigo = req.body.codigo;
+    let fecha = req.body.fechaEntrega;
+    try{
+        await OCompra.findOneAndUpdate({numeroOC:codigo},{fechaEntrega:fecha,estado:'procesado'})
+        res.status(200).json({
+            status: 'success'
+        })
+    }catch(err){
+        res.status(500).json({
+            error: err
+        })
+    }
+}
+
 module.exports = {
     getAll,
     getOne,
     createOCompra,
     anularOCompra,
-    enviarNotificacion
+    enviarNotificacion,
+    oCompraToInventario,
+    oCompraAcceptByProveedor
 }
