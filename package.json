@@ -1,7 +1,6 @@
 {
   "name": "coseinco-sale-backend",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js"
@@ -20,5 +19,15 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.12",
     "puppeteer": "^10.2.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheKid94/coseinco-sale-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TheKid94/coseinco-sale-backend/issues"
+  },
+  "homepage": "https://github.com/TheKid94/coseinco-sale-backend#readme",
+  "description": ""
 }
