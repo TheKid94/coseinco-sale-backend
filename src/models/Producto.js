@@ -9,7 +9,8 @@ const Producto = new Schema({
     codigoFabricante: String,
     SKU: String,
     imagenes: Array,
-    caracteristica: String
+    caracteristica: String, 
+    estado: String
 },{
     versionKey: false
 });
