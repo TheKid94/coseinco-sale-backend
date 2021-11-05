@@ -122,7 +122,7 @@ const enviarNotificacion = async (req,res) => {
             to: proveedor.correo, // Change to your recipient
             from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
             subject: `Generación de Orden de Compra ${compra.numeroOC}`,
-            html: '<strong>Buen día '+ proveedor.razonSocial + ', para aprobar esta orden de compra.</strong>' + '<br>' +'<a href='+`http://localhost:3000/proveedor?codigo=${compra.numeroOC}`+'>Click aqui</a>',
+            html: '<strong>Buen día '+ proveedor.razonSocial + ', para aprobar esta orden de compra.</strong>' + '<br>' +'<a href='+`http://localhost:3000/proveedor/orden-de-compra?codigo=${compra.numeroOC}`+'>Click aqui</a>',
         }
         sgMail
         .send(msg)

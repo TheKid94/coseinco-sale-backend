@@ -68,7 +68,6 @@ const productoCarrito = async (req, res, next) => {
     }
 }
 
-
 const getAllProductoCompra = async (req, res) => {
     let productos = [];
     try{
@@ -95,53 +94,42 @@ const getAllProductoCompra = async (req, res) => {
 const createProducto = async (req, res) => {
     try {
       
-      let producto = req.body.producto;            
-      producto.estado = "habilitado"; 
+        let producto = req.body.producto;            
+        producto.estado = "habilitado"; 
          
 
-      if (producto.length == 0 || Object.keys(producto).length == 0) {
-        res.status(400).json({
-          status: "error",
-        });
-        return false;
-      }
+        if (producto.length == 0 || Object.keys(producto).length == 0) {
+            res.status(400).json({
+            status: "error",
+            });
+            return false;
+        }
 
-      let productoNew = Producto.create(producto);      
+        let productoNew = Producto.create(producto);      
       
-      res.status(200).json({
-        status: "success",
-        productoNew
-      });
+        res.status(200).json({
+            status: "success",
+            productoNew
+        });
     } catch (error) {
-      res.status(500).json({
-        error,
-      });
+        res.status(500).json({
+            error
+        });
     }
 }
 
 const ImagenProductoURL = async(req, res) => {
     const file = req.body.file;
-    const result = await cloudinary.v2.uploader.upload(file,{folder:'Coseinco/Pruebas/AlessandraPruebas'})
+    const sku = req.body.sku;
+    const result = await cloudinary.v2.uploader.upload(file,{folder:`Coseinco/Productos/SKU/${sku}`})
     res.status(200).json({
         status: 'success',
-        msj: result.url
+        url: result.url
     });
 }
 
- 
-  const mostrar = (req, res) =>{
-      Producto.find({}, (error, productos) =>{
-          if(error)
-          {
-              return res.status(500).json({
-                  message: 'Error mostrando los productos'
-              })
-          }
-         return res.render('index.ejs', {productos, productos})
-      })
-  }
 
-module.exports ={
+module.exports = {
     getAll,
     getAllProductoCompra,
     getOne,
