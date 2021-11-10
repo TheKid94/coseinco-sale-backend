@@ -1,8 +1,12 @@
 const { Schema, model } = require('mongoose');
 
 const Movimiento = new Schema({
-    productoID: String,
-    estado: String
+    pedidoID: String,
+    proveedorID: String,
+    fechaRetiro: Date,
+    fechaIngreso: Date,
+    cantidad: Number,
+    tipoMovimiento: String 
 },{
     versionKey: false
 });

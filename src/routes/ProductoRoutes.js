@@ -9,5 +9,5 @@ router.route('/productoCarrito').post(productoController.productoCarrito);
 router.route('/productoCreate').post(productoController.createProducto);
 router.route('/productoImagen').post(productoController.ImagenProductoURL);
 
-router.get('/', productoController.mostrar)
+
 module.exports = router;
