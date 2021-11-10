@@ -47,10 +47,14 @@ const getUserConductores = async (req, res) => {
     try
     {
         const rol = await Rol.findOne({nombre:"Conductor"});
-        const conductores = await Usuario.find({rolID: rol._id});
+        const conductos = await Usuario.find({rolID: rol._id});
+        let newDatos = [];
+        for(var i =0;i<conductos.length;i++){
+            newDatos.push(conductos[i].datos);
+        }
         res.status(200).json({
             status: 'success',
-            conductores
+            conductores: newDatos
         });
     } catch(err)
     {
