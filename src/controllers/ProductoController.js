@@ -135,6 +135,5 @@ module.exports = {
     getOne,
     productoCarrito,
     createProducto,
-    mostrar, 
     ImagenProductoURL
 }

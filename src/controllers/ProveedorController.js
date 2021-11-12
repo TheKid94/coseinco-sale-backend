@@ -42,6 +42,34 @@ const getOne = (req, res) => {
 
 };
 
+const deshabilitarProveedor = async (req, res) => {
+    let id = req.body.id;
+    try{
+        await Proveedor.updateOne({_id: id},{estado:"deshabilitado"});
+        res.status(200).json({
+            status: 'success'
+        })
+    }catch(err){
+        res.status(500).json({
+            error:err
+        })
+    }
+};
+
+const habilitarProveedor = async (req, res) => {
+    let id = req.body.id;
+    try{
+        await Proveedor.updateOne({_id: id},{estado:"habilitado"});
+        res.status(200).json({
+            status: 'success'
+        })
+    }catch(err){
+        res.status(500).json({
+            error:err
+        })
+    }
+};
+
 const createProveedor = async(req,res) =>{
     try{
         const proveedor = req.body.proveedor;
@@ -67,5 +95,7 @@ const createProveedor = async(req,res) =>{
 module.exports = {
     getAll,
     getOne,
-    createProveedor
+    createProveedor,
+    deshabilitarProveedor,
+    habilitarProveedor
 }
