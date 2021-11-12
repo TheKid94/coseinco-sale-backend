@@ -1,5 +1,6 @@
 const { model } = require('mongoose');
 const Usuario = require('../models/Usuario');
+const Rol = require('../models/Rol');
 
 const getAll = (req, res) => {
     Usuario.find({}, (err, users) => {
@@ -42,7 +43,29 @@ const getUser = (req, res) => {
 
 }
 
+const getUserConductores = async (req, res) => {
+    try
+    {
+        const rol = await Rol.findOne({nombre:"Conductor"});
+        const conductos = await Usuario.find({rolID: rol._id});
+        let newDatos = [];
+        for(var i =0;i<conductos.length;i++){
+            newDatos.push(conductos[i].datos);
+        }
+        res.status(200).json({
+            status: 'success',
+            conductores: newDatos
+        });
+    } catch(err)
+    {
+        res.status(500).json({
+            status: err
+        })
+    }
+}
+
 module.exports = {
     getAll,
-    getUser
+    getUser,
+    getUserConductores
 }

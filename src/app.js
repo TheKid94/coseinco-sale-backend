@@ -18,7 +18,7 @@ const inventarioRoutes = require('./routes/InventarioRoutes');
 const proveedorRoutes = require('./routes/ProveedorRoutes');
 const oCompraRoutes = require('./routes/OCompraRoutes');
 const guiaRoutes = require('./routes/GuiaRoutes');
-
+const envioRoutes = require('./routes/EnvioRoutes');
 
 const app = express();
 require('./database');
@@ -35,7 +35,7 @@ app.use('/api/productos', productoRoutes);
 app.use('/api/marcas', marcaRoutes);
 app.use('/api/pedidos',pedidoRoutes);
 app.use('/api/detallePedido',detallePedidosRoutes);
-app.use('/api/Usuario', usuarioRoutes);
+app.use('/api/usuario', usuarioRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/roles', rolRoutes);
 
@@ -43,7 +43,8 @@ app.use('/api/roles', rolRoutes);
 app.use('/api-admin/inventario', inventarioRoutes);
 app.use('/api-admin/proveedor', proveedorRoutes);
 app.use('/api-admin/oCompra', oCompraRoutes);
-app.use('/api-admin/guia', guiaRoutes); 
+app.use('/api-admin/guia', guiaRoutes);
+app.use('/api-admin/envio', envioRoutes)
 
 
 //Error in case there is no route
