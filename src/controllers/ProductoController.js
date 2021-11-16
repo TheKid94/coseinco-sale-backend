@@ -129,11 +129,40 @@ const ImagenProductoURL = async(req, res) => {
 }
 
 
+const inhabilitarProducto = async (req, res) => {
+    let id = req.body.id;
+    try{
+        await Producto.updateOne({SKU: id},{estado:"inhabilitado"});
+        res.status(200).json({
+            status: 'success'
+        })
+    }catch(err){
+        res.status(500).json({
+            error:err
+        })
+    }
+}
+
+const habilitarProducto = async (req, res) => {
+    let id = req.body.id;
+    try{
+        await Producto.updateOne({SKU: id},{estado:"habilitado"});
+        res.status(200).json({
+            status: 'success'
+        })
+    }catch(err){
+        res.status(500).json({
+            error:err
+        })
+    }
+}
 module.exports = {
     getAll,
     getAllProductoCompra,
     getOne,
     productoCarrito,
     createProducto,
-    ImagenProductoURL
+    ImagenProductoURL,
+    inhabilitarProducto,
+    habilitarProducto
 }
