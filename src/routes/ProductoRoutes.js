@@ -11,5 +11,4 @@ router.route('/productoImagen').post(productoController.ImagenProductoURL);
 router.route('/anular').post(productoController.inhabilitarProducto);
 router.route('/habilitar').post(productoController.habilitarProducto);
 
-
 module.exports = router;

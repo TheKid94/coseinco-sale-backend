@@ -6,7 +6,8 @@ const Proveedor = new Schema({
     correo: String,
     contacto: String,
     telefono: String,
-    descuento: Number
+    descuento: Number,
+    estado: String,
 },{
     versionKey: false
 });
