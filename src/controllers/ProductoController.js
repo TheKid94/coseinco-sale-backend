@@ -94,8 +94,17 @@ const getAllProductoCompra = async (req, res) => {
 const createProducto = async (req, res) => {
     try {
       
-        let producto = req.body.producto;            
-        producto.estado = "habilitado"; 
+        let producto = req.body.product;
+        let newProducto = new Object();
+        newProducto.marcaID = producto.brand;
+        newProducto.SKU = producto.sku;
+        newProducto.nombre = producto.name;
+        newProducto.precio = producto.salePrice;
+        newProducto.precioCompra = producto.purchasePrice;
+        newProducto.codigoFabricante = producto.manufacturer;
+        newProducto.caracteristica = producto.feature;
+        newProducto.imagenes = [];
+        newProducto.estado = "habilitado"; 
          
 
         if (producto.length == 0 || Object.keys(producto).length == 0) {
@@ -105,11 +114,11 @@ const createProducto = async (req, res) => {
             return false;
         }
 
-        let productoNew = Producto.create(producto);      
+        let productoRes = Producto.create(newProducto);      
       
         res.status(200).json({
             status: "success",
-            productoNew
+            productoRes
         });
     } catch (error) {
         res.status(500).json({
