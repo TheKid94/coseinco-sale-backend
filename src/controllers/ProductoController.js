@@ -114,7 +114,7 @@ const createProducto = async (req, res) => {
             return false;
         }
 
-        let productoRes = Producto.create(newProducto);      
+        let productoRes = await Producto.create(newProducto);      
       
         res.status(200).json({
             status: "success",
