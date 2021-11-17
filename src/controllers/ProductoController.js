@@ -103,7 +103,7 @@ const createProducto = async (req, res) => {
         newProducto.precioCompra = producto.purchasePrice;
         newProducto.codigoFabricante = producto.manufacturer;
         newProducto.caracteristica = producto.feature;
-        newProducto.imagenes = [];
+        newProducto.imagenes = producto.images;
         newProducto.estado = "habilitado"; 
          
 
