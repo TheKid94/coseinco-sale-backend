@@ -127,6 +127,50 @@ const createProducto = async (req, res) => {
     }
 }
 
+const createProducto = async (req, res) => {
+    try {
+      
+        let producto = req.body.product;
+        let newProducto = new Object();
+        let id = producto.id;
+        newProducto.marcaID = producto.brand;
+        newProducto.SKU = producto.sku;
+        newProducto.nombre = producto.name;
+        newProducto.precio = producto.salePrice;
+        newProducto.precioCompra = producto.purchasePrice;
+        newProducto.codigoFabricante = producto.manufacturer;
+        newProducto.caracteristica = producto.feature;
+         
+
+        if (producto.length == 0 || Object.keys(producto).length == 0) {
+            res.status(400).json({
+            status: "error",
+            });
+            return false;
+        }
+
+        let productoRes = await Producto.findByIdAndUpdate(id,{
+            marcaID: newProducto.marcaID,
+            SKU: newProducto.SKU,
+            nombre: newProducto.nombre,
+            precio: newProducto.precio,
+            precioCompra: newProducto.precioCompra,
+            codigoFabricante: newProducto.codigoFabricante,
+            caracteristica: newProducto.caracteristica
+        });
+        // let productoRes = await Producto.create(newProducto);     
+      
+        res.status(200).json({
+            status: "success",
+            productoRes
+        });
+    } catch (error) {
+        res.status(500).json({
+            error
+        });
+    }
+}
+
 const ImagenProductoURL = async(req, res) => {
     const file = req.body.file;
     const sku = req.body.sku;
