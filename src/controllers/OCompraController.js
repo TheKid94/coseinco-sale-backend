@@ -152,7 +152,10 @@ const oCompraToInventario = async(req,res) =>{
             let invstock = inventario.nSerie;
             let nseries = [];
             for(var j=0; j<productos[i].serialNumbers.length;j++){
-                nseries.push(productos[i].serialNumbers[j]);
+                var serieaux = new Object();
+                serieaux.numero = productos[i].serialNumbers[j];
+                serieaux.estado = 'habilitado';
+                nseries.push(serieaux);
             }
             let newseries = invstock.concat(nseries);
             let newStock = newseries.length;
