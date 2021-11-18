@@ -52,11 +52,22 @@ const createGuia = async(req, res) => {
     try{
         for(var i=0;i<productos.length;i++){
             let instock = await Inventario.findOne({productoID: productos[i].productoID});
+            let stockReserve = [];
             let myArray = transformArray(instock.nSerie);
-            let toRemove = transformArray(productos[i].serialNumbers);
-            let difference = transformDifference(myArray,toRemove);
+            for(var j=0;j<productos[i].serialNumbers.length;j++){
+                let prod = myArray.find(x=>x.numero == productos[i].serialNumbers[j]);
+                prod.estado = 'reservado';
+                stockReserve.push(prod);
+            }
+            let difference = myArray.map(a => {
+                const exist = stockReserve.find(b=>a.estado == b.estado);
+                if(exist){
+                    a.estado = exist.estado;
+                }
+                return a;
+            });
             await Inventario.findOneAndUpdate({productoID: productos[i].productoID},
-                {"stock":instock.stock - productos[i].serialNumbers.length,"nSerie":difference}
+                {"stock":difference.filter(x=>x.estado == 'habilitado').length ,"nSerie":difference}
             )
             nseries.push(productos[i]);
         };
@@ -82,17 +93,6 @@ const transformArray = (arr) => {
         array.push(arr[i]);
     }
     return array;
-}
-
-const transformDifference = (myArray, toRemove)=>{
-    for(let i=0;i<myArray.length;i++){
-        for(let j=0; j<toRemove.length;j++){
-            if(myArray[i] === toRemove[j]){
-                myArray.splice(i,1);
-            }
-        }
-    }
-    return myArray;
 }
 
 

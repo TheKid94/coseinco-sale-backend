@@ -94,6 +94,10 @@ const getUsersAdmin = async (req, res) => {
     }
 }
 
+const createUser = async(req, res) =>{
+    
+}
+
 const eliminateImage = async(req, res) => {
     try
     {
