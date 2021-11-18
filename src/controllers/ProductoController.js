@@ -127,7 +127,7 @@ const createProducto = async (req, res) => {
     }
 }
 
-const createProducto = async (req, res) => {
+const updateProducto = async (req, res) => {
     try {
       
         let producto = req.body.product;
@@ -217,5 +217,6 @@ module.exports = {
     createProducto,
     ImagenProductoURL,
     inhabilitarProducto,
-    habilitarProducto
+    habilitarProducto,
+    updateProducto
 }
