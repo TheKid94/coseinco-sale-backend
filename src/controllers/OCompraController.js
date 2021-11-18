@@ -75,7 +75,7 @@ const createOCompra = async(req, res) =>{
         });
     }
     try{
-        let compraux = new Object;
+        let compraux = new Object();
         let total = 0.00; 
         let nCompras = await OCompra.find({});
         for(var i=0;i<ocompra.productos.length;i++){
@@ -149,17 +149,32 @@ const oCompraToInventario = async(req,res) =>{
     try{
         for(var i=0;i<productos.length;i++){
             let inventario = await Inventario.findOne({productoID: productos[i].productoID});
-            let invstock = inventario.nSerie;
             let nseries = [];
-            for(var j=0; j<productos[i].serialNumbers.length;j++){
-                var serieaux = new Object();
-                serieaux.numero = productos[i].serialNumbers[j];
-                serieaux.estado = 'habilitado';
-                nseries.push(serieaux);
+            if(!inventario){
+                let newInventario = new Object();
+                newInventario.fechaRegistro = Date.now();
+                for(var j=0; j<productos[i].serialNumbers.length;j++){
+                    var serieaux = new Object();
+                    serieaux.numero = productos[i].serialNumbers[j];
+                    serieaux.estado = 'habilitado';
+                    nseries.push(serieaux);
+                }
+                newInventario.nSerie = nseries;
+                newInventario.productoID = productos[i].productoID;
+                newInventario.stock = nseries.length;
+                await Inventario.create(newInventario)
+            }else{
+                let invstock = inventario.nSerie;
+                for(var j=0; j<productos[i].serialNumbers.length;j++){
+                    var serieaux = new Object();
+                    serieaux.numero = productos[i].serialNumbers[j];
+                    serieaux.estado = 'habilitado';
+                    nseries.push(serieaux);
+                }
+                let newseries = invstock.concat(nseries);
+                let newStock = newseries.length;
+                await Inventario.findOneAndUpdate({productoID: productos[i].productoID},{stock:newStock, nSerie:newseries});
             }
-            let newseries = invstock.concat(nseries);
-            let newStock = newseries.length;
-            await Inventario.findOneAndUpdate({productoID: productos[i].productoID},{stock:newStock, nSerie:newseries});
         }
         await OCompra.findOneAndUpdate({numeroOC:codigoCompra},{estado:"finalizado"});
         res.status(200).json({
