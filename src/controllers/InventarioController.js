@@ -6,6 +6,19 @@ const getSeriesByProductId = async(req,res) => {
     let id = req.params.id;
     try{
         let inventario = await Inventario.findOne({productoID:id});
+        let seriesAlmacenado = inventario.nSerie;
+        let seriesHabilitado = [];
+        let seriesReservado = [];
+        for(var i=0;i<inventario.nSerie.length;i++){
+            if(inventario.nSerie[i].estado=="habilitado"){
+                seriesHabilitado.push(inventario.nSerie[i]);
+            }
+        }
+        for(var j=0;j<inventario.nSerie.length;j++){
+            if(inventario.nSerie[j].estado=="reservado"){
+                seriesReservado.push(inventario.nSerie[j]);
+            }
+        }
         if(!inventario){
             return res.status(404).json({
                 message: 'No existe'
@@ -13,13 +26,15 @@ const getSeriesByProductId = async(req,res) => {
         }
         res.status(200).json({
             status: 'success',
-            nSeries: inventario.nSerie
+            nSeriesHabilitado: seriesHabilitado,
+            nSeriesReservado: seriesReservado,
+            nSeriesAlmacenado: seriesAlmacenado
         })
     }catch(err){
         return res.status(500).json({
             err
         })
-    }   
+    }
 }
 
 const getInventarios = async(req,res)=>{
