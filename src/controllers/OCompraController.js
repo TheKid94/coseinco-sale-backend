@@ -47,6 +47,7 @@ const getOne = async (req, res) => {
             producto.productoId = productoaux._id;
             producto.SKU = productoaux.SKU;
             producto.nombre = productoaux.nombre;
+            producto.precioCompra = productoaux.precioCompra;
             producto.imagen = productoaux.imagenes[0];
             producto.cantidad = compraaux.productos[i].cantidad;
             producto.subtotal = compraaux.productos[i].subtotal;
@@ -190,8 +191,17 @@ const oCompraToInventario = async(req,res) =>{
 const oCompraAcceptByProveedor = async(req,res)=>{
     let codigo = req.body.codigo;
     let fecha = req.body.fechaEntrega;
+    let compra = req.body.compra;
+    let productsCompra =[];
     try{
-        await OCompra.findOneAndUpdate({numeroOC:codigo},{fechaEntrega:fecha,estado:'procesado'})
+        for(var i=0;i<compra.productos.length;i++){
+            let productchange = new Object();
+            productchange.id = compra.productos[i].productoId;
+            productchange.cantidad = compra.productos[i].cantidad;
+            productchange.subtotal = compra.productos[i].subtotal;
+            productsCompra.push(productchange);
+        }
+        await OCompra.findOneAndUpdate({numeroOC:codigo},{fechaEntrega:fecha,estado:'procesado'},{total:compra.total},{productos:productsCompra})
         res.status(200).json({
             status: 'success'
         })
