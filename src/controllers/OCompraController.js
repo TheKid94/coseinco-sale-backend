@@ -86,7 +86,7 @@ const createOCompra = async(req, res) =>{
         compraux.total = total;
         compraux.fechaEntrega = ocompra.fechaEntrega;
         compraux.proveedorID = ocompra.proveedorID;
-        compraux.estado = "generado";
+        compraux.estado = "cotizado";
         const ocomprares = await OCompra.create(compraux)
         res.status(200).json({
             status: 'success',
