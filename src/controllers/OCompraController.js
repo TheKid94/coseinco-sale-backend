@@ -201,7 +201,7 @@ const oCompraAcceptByProveedor = async(req,res)=>{
             productchange.subtotal = compra.productos[i].subtotal;
             productsCompra.push(productchange);
         }
-        await OCompra.findOneAndUpdate({numeroOC:codigo},{fechaEntrega:fecha,estado:'procesado'},{total:compra.total},{productos:productsCompra})
+        await OCompra.findOneAndUpdate({numeroOC:codigo},{fechaEntrega:fecha, estado:'procesado', total:compra.total, productos:productsCompra})
         res.status(200).json({
             status: 'success'
         })
