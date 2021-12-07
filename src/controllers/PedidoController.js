@@ -3,6 +3,10 @@ const Producto = require("../models/Producto");
 const Marca = require("../models/Marca");
 const DetallePedido = require("../models/DetallePedido");
 const Guia = require("../models/Guia");
+const OCompra = require("../models/OCompra");
+const Rol = require("../models/Rol");
+const Usuario = require("../models/Usuario");
+const Inventario = require("../models/Inventario");
 
 const getAll = (req, res) => {
   Pedido.find({}, (err, pedidos) => {
@@ -61,8 +65,8 @@ const createPedido = async (req, res) => {
       return false;
     }
     newPedido.codigoPedido = "P" + `${nPedidos.length + 1}`.padStart(5, "0");
-    newPedido.fechaRegistro = Date.now();
-    newPedido.fechaEntrega = new Date(Date.now() + 2);
+    newPedido.fechaRegistro = new Date();
+    newPedido.fechaEntrega = new Date(Date.now() + 2*24*3600*1000)
     for (var i = 0; i < productos.length; i++) {
       let producto = await Producto.findById(productos[i]._id);
       let marcatemp = await Marca.findById(producto.marcaID);
@@ -209,6 +213,159 @@ const getPedidoReservabyId = async(req,res)=>{
    
 }
 
+const GetDashboardPedidos = async(req,res) =>{
+  try{
+    let pedidos = await Pedido.find({});
+    let compras = await OCompra.find({});
+    let usuarios = await Usuario.find({});
+    let inventarios = await Inventario.find({});
+    let donutPedidos = GetDonutPedidos(pedidos);
+    let donutCompras = GetDonutCompras(compras);
+    let clientes = await GetClientes(usuarios);
+    let ordenes = GetOrdenes(compras);
+    let ventasDelDia = VentasDia(pedidos);
+    let pedidosPorEnviar = PedidosPorEnviar(pedidos);
+    let inventarioLow = await GetInventarioLowStock(inventarios);
+    res.status(200).json({
+      clientes,
+      ordenes,
+      ventasDelDia,
+      pedidosPorEnviar,
+      inventarioLow,
+      donutPedidos,
+      donutCompras
+    })
+  } 
+  catch(error)
+  {
+    res.status(500).json({
+      error
+    })
+  }
+}
+
+
+const GetDonutPedidos = (pedidos)=>{
+  let donutPedidos = new Object();
+  let pedidoGenerado = 0;
+  let pedidoReservado = 0;
+  let pedidoEmpaquetado = 0;
+  let pedidoEnviado = 0;
+  let pedidoFinalizado = 0;
+  for(var i=0; i<pedidos.length;i++){
+    switch(pedidos[i].estado){
+      case "generado":
+        pedidoGenerado++;
+        break;
+      case "reservado":
+        pedidoReservado++;
+        break;
+      case "empaquetado":
+        pedidoEmpaquetado++;
+        break;
+      case "enviado":
+        pedidoEnviado++;
+        break;
+      case "finalizado":
+        pedidoFinalizado++;
+        break;
+    }
+  }
+  donutPedidos.pedidoGenerado = pedidoGenerado;
+  donutPedidos.pedidoReservado = pedidoReservado;
+  donutPedidos.pedidoEmpaquetado = pedidoEmpaquetado;
+  donutPedidos.pedidoEnviado = pedidoEnviado;
+  donutPedidos.pedidoFinalizado = pedidoFinalizado;
+  return donutPedidos;
+}
+
+const GetDonutCompras = (compras)=>{
+  let donutCompras = new Object();
+  let compraCotizado = 0;
+  let compraProcesado = 0;
+  let compraAnulado = 0;
+  let compraFinalizado = 0;
+  for(var i=0; i<compras.length;i++){
+    switch(compras[i].estado){
+      case "cotizado":
+        compraCotizado++;
+        break;
+      case "procesado":
+        compraProcesado++;
+        break;
+      case "finalizado":
+        compraFinalizado++;
+        break;
+      case "anulado":
+        compraAnulado++;
+        break;
+    }
+  }
+  donutCompras.compraCotizado = compraCotizado;
+  donutCompras.compraProcesado = compraProcesado;
+  donutCompras.compraAnulado = compraAnulado;
+  donutCompras.compraFinalizado = compraFinalizado;
+  return donutCompras;
+}
+
+const GetClientes = async(usuarios) =>{
+  let rol = await Rol.findOne({nombre:"Cliente"}).exec();
+  let clientes = 0;
+  for(var i=0; i<usuarios.length;i++){
+    if(usuarios[i].rolID == rol._id){
+      clientes++;
+    }
+  }
+  return clientes;
+}
+
+const GetOrdenes = (compras) => {
+  let ordenes =0;
+  for(var i=0; i<compras.length;i++){
+    if(compras[i].estado == "procesado"){
+      ordenes++;
+    }
+  }
+  return ordenes;
+}
+
+const PedidosPorEnviar = (pedidos) =>{
+  let porEnviar =0;
+  for(var i=0; i<pedidos.length;i++){
+    if(pedidos[i].estado == "empaquetado"){
+      porEnviar++;
+    }
+  }
+  return porEnviar;
+}
+
+const VentasDia = (pedidos) =>{
+  let ventas = 0.00;
+  let hoy = new Date();
+  for(var i=0; i<pedidos.length;i++){
+    let pedidoRegis = pedidos[i].fechaRegistro;
+    if(pedidoRegis.getMonth() == hoy.getMonth() && pedidoRegis.getDate() == hoy.getDate() && pedidoRegis.getFullYear()==hoy.getFullYear()){
+      ventas = ventas + pedidos[i].precioVenta;
+    }
+  }
+  return ventas;
+}
+
+const GetInventarioLowStock = async(inventarios) =>{
+  let productos = [];
+  for(var i=0;i<inventarios.length;i++){
+    if(inventarios[i].stock <= 4){
+      let productoLow = new Object();
+      let producto = await Producto.findById(inventarios[i].productoID);
+      productoLow.imagen = producto.imagenes[0];
+      productoLow.nombre = producto.nombre;
+      productoLow.stock = inventarios[i].stock;
+      productoLow.venta = producto.precio;
+      productos.push(productoLow);
+    }
+  }
+  return productos;
+}
 
 module.exports = {
   getAll,
@@ -216,5 +373,6 @@ module.exports = {
   createPedido,
   adminCambioEstado,
   getPedidoParaReservar,
-  getPedidoReservabyId
+  getPedidoReservabyId,
+  GetDashboardPedidos
 };

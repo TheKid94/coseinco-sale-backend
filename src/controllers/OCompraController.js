@@ -153,7 +153,7 @@ const oCompraToInventario = async(req,res) =>{
             let nseries = [];
             if(!inventario){
                 let newInventario = new Object();
-                newInventario.fechaRegistro = Date.now();
+                newInventario.fechaRegistro = new Date();
                 for(var j=0; j<productos[i].serialNumbers.length;j++){
                     var serieaux = new Object();
                     serieaux.numero = productos[i].serialNumbers[j];
