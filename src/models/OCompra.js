@@ -10,7 +10,15 @@ const OCompra = new Schema({
         type: Date,
         default: Date.now()
     },
-    fechaEntrega: Date
+    fechaEntrega: Date,
+    cotizacionAccept: {
+        type: Boolean,
+        default: false
+    },
+    url:{
+        type:String,
+        default:""
+    }
 },{
     versionKey: false
 });

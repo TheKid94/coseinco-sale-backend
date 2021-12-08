@@ -1,9 +1,25 @@
+const fs = require('fs');
+const path = require('path');
+const utils = require('util');
+const puppeteer = require('puppeteer');
+const hb = require('handlebars');
+const readFile = utils.promisify(fs.readFile);
+
+const sgMail = require('@sendgrid/mail');
+
+const cloudinary = require('cloudinary');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+
 const OCompra = require('../models/OCompra');
 const Proveedor = require('../models/Proveedor');
 const Producto = require('../models/Producto');
 const Inventario = require('../models/Inventario');
-
-const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -119,25 +135,51 @@ const enviarNotificacion = async (req,res) => {
     try{
         let compra = await OCompra.findOne({numeroOC:ncompra});
         let proveedor = await Proveedor.findById(compra.proveedorID);
-        const msg = {
-            to: proveedor.correo, // Change to your recipient
-            from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
-            subject: `Generación de Orden de Compra ${compra.numeroOC}`,
-            html: '<strong>Buen día '+ proveedor.razonSocial + ', para aprobar esta orden de compra.</strong>' + '<br>' +'<a href='+`http://localhost:3000/proveedor/orden-de-compra?codigo=${compra.numeroOC}`+'>Click aqui</a>',
-        }
-        sgMail
-        .send(msg)
-        .then(() => {
-            res.status(200).json({
-                status: 'success',
-            });
-        })
-        .catch((error) => {
-            res.status(401).json({
-                error: error,
-            });
-        })
-    } catch (error) {
+        await getTemplateHtml().then(async (resp)=>{
+            let prod = "";
+            let reshtml = resp;
+            let date = compra.fechaRegistro;
+            let day = date.getDate();
+            let month = date.getMonth();
+            let year = date.getFullYear();
+            const link = '<strong>Buen día '+ proveedor.razonSocial + ', para aprobar esta orden de compra.</strong>' + '<br>' +'<a href='+`http://localhost:3000/proveedor/orden-de-compra?codigo=${compra.numeroOC}`+'>Click aqui</a>';
+            reshtml = reshtml.replace('#CodigoCompra',compra.numeroOC);
+            reshtml = reshtml.replace('#FechaRegistro', `${day + 1}/${month + 1}/${year}`);
+            reshtml = reshtml.replace('#ProveedorNombre',proveedor.razonSocial);
+            reshtml = reshtml.replace('#ProveedorCorreo',`${proveedor.correo}`);
+            reshtml = reshtml.replace('#ProveedorRuc',`${proveedor.ruc}`);
+            for(var i=0; i<compra.productos.length;i++){
+                let producto = await Producto.findById(compra.productos[i].id);
+                prod += '<tr class="item">';
+                prod += `<td>${producto.nombre}</td>`;
+                prod += `<td style="text-align: left !important;">${producto.SKU}</td>`;
+                prod += `<td>${compra.productos[i].cantidad}</td>`;
+                prod += '</tr>';
+            }
+            reshtml = reshtml.replace('#Productos', prod);
+            reshtml = reshtml.replace('#Confirmacion', link);
+            const msg = {
+                to: proveedor.correo, // Change to your recipient
+                from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
+                subject: `Generación de Orden de Compra ${compra.numeroOC}`,
+                html: reshtml
+            }
+            sgMail.send(msg).then(() => {
+                res.status(200).json({
+                    status: 'success',
+                });
+            }).catch((error) => {
+                res.status(401).json({
+                    error: error,
+                });
+            })
+        }).catch(err => {
+            res.status(500).json({
+                error: err
+            })
+            console.error(err);
+        });
+    } catch(error){
         res.status(500).json({
             error: error,
         });
@@ -188,6 +230,70 @@ const oCompraToInventario = async(req,res) =>{
     }
 }
 
+const OCompraGenerarDoc = async(req, res)=>{
+    let ncompra = req.body.ncompra;
+    try{
+        let compra = await OCompra.findOne({numeroOC:ncompra});
+        let proveedor = await Proveedor.findById(compra.proveedorID);
+        let data = {};
+        await getTemplateHtmlOCompra().then(async (resp)=>{
+            let prod = "";
+            let reshtml = resp;
+            let fechaReg = compra.fechaRegistro;
+            let diaReg = fechaReg.getDate();
+            let mesReg = fechaReg.getMonth();
+            let anioReg = fechaReg.getFullYear();
+            let fechaEnt = compra.fechaEntrega;
+            let diaEnt = fechaEnt.getDate();
+            let mesEnt = fechaEnt.getMonth();
+            let anioEnt = fechaEnt.getFullYear();
+            const total = '<strong style="float: right; margin-right: 45px;">' + 'Total: '+ compra.total + '</strong> '; 
+            reshtml = reshtml.replace('#CodigoCompra',compra.numeroOC);
+            reshtml = reshtml.replace('#FechaRegistro', `${diaReg + 1}/${mesReg + 1}/${anioReg}`);
+            reshtml = reshtml.replace('#FechaLlegada', `${diaEnt + 1}/${mesEnt + 1}/${anioEnt}`);
+            reshtml = reshtml.replace('#ProveedorNombre',proveedor.razonSocial);
+            reshtml = reshtml.replace('#ProveedorCorreo',`${proveedor.correo}`);
+            reshtml = reshtml.replace('#ProveedorRuc',`${proveedor.ruc}`);
+            for(var i=0; i<compra.productos.length;i++){
+                let producto = await Producto.findById(compra.productos[i].id);
+                prod += '<tr class="item">';
+                prod += `<td>${producto.nombre}</td>`;
+                prod += `<td style="text-align: left !important;">${producto.SKU}</td>`;
+                prod += `<td>${compra.productos[i].cantidad}</td>`;
+                prod += `<td>${compra.productos[i].subtotal}</td>`;
+                prod += '</tr>';
+            }
+            reshtml = reshtml.replace('#Productos', prod);
+            reshtml = reshtml.replace('#Total', total);
+            const template = hb.compile(reshtml, { strict: true });
+            let result = template(data);
+            let html = result;
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.setContent(html);
+            let pathfile = `src/public/${compra.numeroOC}.pdf`;
+            await page.pdf({ path: pathfile, format: 'A4' });
+            const resultcloud = await cloudinary.v2.uploader.upload(pathfile,{folder:`Coseinco/OCompras/${compra.numeroOC}`});
+            await browser.close();
+            fs.unlink(pathfile,(err)=>{
+                if(err){
+                    res.status(500).json({
+                        error: err
+                    })
+                };
+            })
+            await OCompra.findOneAndUpdate({numeroOC: compra.numeroOC},{"url": resultcloud.url});
+            res.status(200).json({
+                status: 'success'
+            })
+        })
+    }catch(err){
+        res.status(500).json({
+            error: err
+        });
+    }
+}
+
 const oCompraAcceptByProveedor = async(req,res)=>{
     let codigo = req.body.codigo;
     let fecha = req.body.fechaEntrega;
@@ -201,7 +307,7 @@ const oCompraAcceptByProveedor = async(req,res)=>{
             productchange.subtotal = compra.productos[i].subtotal;
             productsCompra.push(productchange);
         }
-        await OCompra.findOneAndUpdate({numeroOC:codigo},{fechaEntrega:fecha, estado:'procesado', total:compra.total, productos:productsCompra})
+        await OCompra.findOneAndUpdate({numeroOC:codigo},{fechaEntrega:fecha, estado:'procesado', total:compra.total, productos:productsCompra, cotizacionAccept:true})
         res.status(200).json({
             status: 'success'
         })
@@ -212,6 +318,31 @@ const oCompraAcceptByProveedor = async(req,res)=>{
     }
 }
 
+async function getTemplateHtml() {
+    
+    console.log("Loading template file in memory")
+    try {
+    const invoicePath = path.resolve("src/public/templates/ocompraConfirm.html");
+    return await readFile(invoicePath, 'utf8');
+    } catch (err) {
+    return Promise.reject("Could not load html template");
+    }
+    
+}
+
+async function getTemplateHtmlOCompra() {
+    
+    console.log("Loading template file in memory")
+    try {
+    const invoicePath = path.resolve("src/public/templates/ocompra.html");
+    return await readFile(invoicePath, 'utf8');
+    } catch (err) {
+    return Promise.reject("Could not load html template");
+    }
+    
+}
+
+
 module.exports = {
     getAll,
     getOne,
@@ -219,5 +350,6 @@ module.exports = {
     anularOCompra,
     enviarNotificacion,
     oCompraToInventario,
-    oCompraAcceptByProveedor
+    oCompraAcceptByProveedor,
+    OCompraGenerarDoc
 }
