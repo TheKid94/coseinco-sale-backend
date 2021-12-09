@@ -83,6 +83,40 @@ const getOne = async (req, res) => {
     }
 };
 
+const getOneConfirm = async (req, res) => {
+    const id = req.params.id;
+    let productos =[];
+    try{
+        let compra = new Object();
+        let compraaux = await OCompra.findOne({numeroOC:id});
+        compra.numeroOC = compraaux.numeroOC;
+        compra.total = compraaux.total;
+        for(var i=0;i<compraaux.productos.length;i++){
+            let producto = new Object()
+            let productoaux = await Producto.findById(compraaux.productos[i].id);
+            producto.productoId = productoaux._id;
+            producto.SKU = productoaux.SKU;
+            producto.nombre = productoaux.nombre;
+            producto.precioCompra = 0.00;
+            producto.imagen = productoaux.imagenes[0];
+            producto.cantidad = compraaux.productos[i].cantidad;
+            producto.subtotal = 0.00;
+            productos.push(producto);
+        };
+        compra.productos = productos;
+        let proveedor = await Proveedor.findById(compraaux.proveedorID);
+        res.status(200).json({
+            status:'success',
+            compra,
+            proveedor
+        })
+    }catch(err){
+        res.status(500).json({
+            error: err
+        })
+    }
+};
+
 const createOCompra = async(req, res) =>{
     const ocompra = req.body.ocompra;
     if(Object.keys(ocompra).length == 0){
@@ -359,6 +393,7 @@ async function getTemplateHtmlOCompra() {
 module.exports = {
     getAll,
     getOne,
+    getOneConfirm,
     createOCompra,
     anularOCompra,
     enviarNotificacion,
