@@ -198,7 +198,7 @@ const enviarNotificacion = async (req,res) => {
             const msg = {
                 to: proveedor.correo, // Change to your recipient
                 from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
-                subject: `Generación de Orden de Compra ${compra.numeroOC}`,
+                subject: `Se ha generado una cotización de parte de Coseinco S.A.`,
                 html: reshtml
             }
             sgMail.send(msg).then(() => {
