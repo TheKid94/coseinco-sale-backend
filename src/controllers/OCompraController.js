@@ -332,9 +332,21 @@ const OCompraGenerarDoc = async(req, res)=>{
                     })
                 };
             })
-            await OCompra.findOneAndUpdate({numeroOC: compra.numeroOC},{"url": resultcloud.url});
-            res.status(200).json({
-                status: 'success'
+            await OCompra.findOneAndUpdate({numeroOC: compra.numeroOC},{url: resultcloud.url});
+            const msg = {
+                to: proveedor.correo, // Change to your recipient
+                from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
+                subject: `Generación de Orden de Compra ${compra.numeroOC}`,
+                html: reshtml
+            }
+            sgMail.send(msg).then(() => {
+                res.status(200).json({
+                    status: 'success',
+                });
+            }).catch((error) => {
+                res.status(401).json({
+                    error: error,
+                });
             })
         })
     }catch(err){
