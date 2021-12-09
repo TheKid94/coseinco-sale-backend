@@ -332,7 +332,7 @@ const OCompraGenerarDoc = async(req, res)=>{
                     })
                 };
             })
-            await OCompra.findOneAndUpdate({numeroOC: compra.numeroOC},{url: resultcloud.url, estado:"Orden de compra"});
+            await OCompra.findOneAndUpdate({numeroOC: compra.numeroOC},{url: resultcloud.url, estado:"procesado"});
             const msg = {
                 to: proveedor.correo, // Change to your recipient
                 from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
