@@ -11,5 +11,6 @@ router.route('/enviarNotificacion').post(oCompraController.enviarNotificacion);
 router.route('/oCompraToInventario').post(oCompraController.oCompraToInventario);
 router.route('/oCompraAcceptByProv').post(oCompraController.oCompraAcceptByProveedor);
 router.route('/oCompraGenerarDoc').post(oCompraController.OCompraGenerarDoc);
+router.route('/guiaRemisionProveedorURL').post(oCompraController.GuiaRemisiontoURL);
 
 module.exports = router;

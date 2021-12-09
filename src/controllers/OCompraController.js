@@ -101,7 +101,7 @@ const createOCompra = async(req, res) =>{
         compraux.numeroOC = "OC" + `${nCompras.length + 1}`.padStart(5, "0");
         compraux.productos = ocompra.productos;
         compraux.total = total;
-        compraux.fechaEntrega = ocompra.fechaEntrega;
+        compraux.fechaEntrega = new Date();
         compraux.proveedorID = ocompra.proveedorID;
         compraux.estado = "cotizado";
         const ocomprares = await OCompra.create(compraux)
@@ -189,6 +189,7 @@ const enviarNotificacion = async (req,res) => {
 const oCompraToInventario = async(req,res) =>{
     let codigoCompra = req.body.codigo;
     let productos = req.body.productos;
+    let guiaProveedor = req.body.guiaProveedor;
     try{
         for(var i=0;i<productos.length;i++){
             let inventario = await Inventario.findOne({productoID: productos[i].productoID});
@@ -219,7 +220,7 @@ const oCompraToInventario = async(req,res) =>{
                 await Inventario.findOneAndUpdate({productoID: productos[i].productoID},{stock:newStock, nSerie:newseries});
             }
         }
-        await OCompra.findOneAndUpdate({numeroOC:codigoCompra},{estado:"finalizado"});
+        await OCompra.findOneAndUpdate({numeroOC:codigoCompra},{estado:"finalizado", guiaProveedor: guiaProveedor});
         res.status(200).json({
             status: 'success'
         })
@@ -228,6 +229,18 @@ const oCompraToInventario = async(req,res) =>{
             error: err
         });
     }
+}
+
+const GuiaRemisiontoURL = async(req, res) => {
+    const file = req.body.file;
+    const ncompra = req.body.ncompra;
+    let compra = await OCompra.findOne({numeroOC:ncompra})
+    let proveedor = await Proveedor.findById(compra.proveedorID);
+    const result = await cloudinary.v2.uploader.upload(file,{folder:`Coseinco/OCompras/${ncompra}/${proveedor.razonSocial}`});
+    res.status(200).json({
+        status: 'success',
+        url: result.url
+    }); 
 }
 
 const OCompraGenerarDoc = async(req, res)=>{
@@ -351,5 +364,6 @@ module.exports = {
     enviarNotificacion,
     oCompraToInventario,
     oCompraAcceptByProveedor,
-    OCompraGenerarDoc
+    OCompraGenerarDoc,
+    GuiaRemisiontoURL
 }

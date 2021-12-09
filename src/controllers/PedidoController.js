@@ -7,6 +7,7 @@ const OCompra = require("../models/OCompra");
 const Rol = require("../models/Rol");
 const Usuario = require("../models/Usuario");
 const Inventario = require("../models/Inventario");
+const Envio = require("../models/Envio");
 
 const getAll = (req, res) => {
   Pedido.find({}, (err, pedidos) => {
@@ -135,6 +136,34 @@ const adminCambioEstado = async (req, res) => {
     });
   }
 };
+
+const EnviarPedido = async(req, res) =>{
+  let codigoPedido = req.body.codigo;
+  let docConfirm = req.body.doc;
+  try{
+    let pedido = await Pedido.findOne({codigoPedido: codigoPedido});
+    await Pedido.findOneAndUpdate({codigoPedido:codigoPedido}, {estado:"finalizado"})
+    await Envio.findOneAndUpdate({pedidoID: pedido._id},{constanciaEnvio: docConfirm})
+    res.status(200).json({
+      status: "success",
+    });
+  }catch(err){
+    res.status(500).json({
+      error: err
+    })
+  }
+}
+
+const ConstanciaEnviotoURL = async(req, res) => {
+  const file = req.body.file;
+  const npedido = req.body.npedido;
+  let pedido = await Pedido.findOne({codigoPedido:npedido});
+  const result = await cloudinary.v2.uploader.upload(file,{folder:`Coseinco/Pedidos/${pedido.codigoPedido}`});
+  res.status(200).json({
+      status: 'success',
+      url: result.url
+  }); 
+}
 
 const getPedidoParaReservar = async (req, res) => {
   let pedidos = await Pedido.find({});
@@ -374,5 +403,8 @@ module.exports = {
   adminCambioEstado,
   getPedidoParaReservar,
   getPedidoReservabyId,
-  GetDashboardPedidos
+  GetDashboardPedidos,
+  EnviarPedido,
+  ConstanciaEnviotoURL
 };
+

@@ -18,6 +18,10 @@ const OCompra = new Schema({
     url:{
         type:String,
         default:""
+    },
+    guiaProveedor:{
+        type:String,
+        default:""
     }
 },{
     versionKey: false

@@ -12,4 +12,8 @@ router.route('/admin/reservas').get(pedidoController.getPedidoParaReservar);
 
 router.route('/admin/dashboard').get(pedidoController.GetDashboardPedidos);
 
+router.route('/admin/pedidoEnviar').post(pedidoController.EnviarPedido);
+router.route('/admin/constanciaConvertURL').post(pedidoController.ConstanciaEnviotoURL);
+
+
 module.exports = router;
