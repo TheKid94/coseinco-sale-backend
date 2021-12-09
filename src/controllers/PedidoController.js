@@ -199,8 +199,11 @@ const getPedidoParaReservar = async (req, res) => {
       pedidoaux.fechaRegistro = pedidos[i].fechaRegistro;
       pedidoaux.estado = pedidos[i].estado;
       let guiaaux = await Guia.findOne({codigoPedido: pedidos[i].codigoPedido});
+      let envioaux = await Envio.findOne({pedidoID: pedidos[i]._id});
       let url = (!guiaaux) ? "":guiaaux.url;
+      let constanciaEnvio = (!envioaux) ? "":envioaux.constanciaEnvio;
       pedidoaux.url = url;
+      pedidoaux.constanciaEnvio = constanciaEnvio;
       pedidosres.push(pedidoaux);
     }
     res.status(200).json({
