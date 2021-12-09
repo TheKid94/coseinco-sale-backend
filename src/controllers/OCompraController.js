@@ -36,6 +36,9 @@ const getAll = async (req, res) => {
            compraaux.total = oCompras[i].total;
            compraaux.fechaEntrega = oCompras[i].fechaEntrega;
            compraaux.proveedor = proveedor.razonSocial;
+           compraaux.cotizacionAccept = oCompras[i].cotizacionAccept;
+           compraaux.url = oCompras[i].url;
+           compraaux.guiaProveedor = oCompras[i].guiaProveedor;
            compras.push(compraaux);
        }
        res.status(200).json({
