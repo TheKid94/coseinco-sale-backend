@@ -142,7 +142,7 @@ const enviarNotificacion = async (req,res) => {
             let day = date.getDate();
             let month = date.getMonth();
             let year = date.getFullYear();
-            const link = '<strong>Buen día '+ proveedor.razonSocial + ', para aprobar esta orden de compra.</strong>' + '<br>' +'<a href='+`http://localhost:3000/proveedor/orden-de-compra?codigo=${compra.numeroOC}`+'>Click aqui</a>';
+            const link = '<strong>Buen día '+ proveedor.razonSocial + ', para aprobar esta cotización.</strong>' + '<br>' +'<a href='+`http://localhost:3000/proveedor/orden-de-compra?codigo=${compra.numeroOC}`+'>Click aqui</a>';
             reshtml = reshtml.replace('#CodigoCompra',compra.numeroOC);
             reshtml = reshtml.replace('#FechaRegistro', `${day + 1}/${month + 1}/${year}`);
             reshtml = reshtml.replace('#ProveedorNombre',proveedor.razonSocial);
