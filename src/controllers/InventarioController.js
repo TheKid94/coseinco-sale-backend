@@ -1,6 +1,70 @@
 const Inventario = require('../models/Inventario');
 const Producto = require('../models/Producto');
 const Marca = require('../models/Marca');
+const Movimiento = require('../models/Movimiento');
+const cloudinary = require('cloudinary');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const OCompraURL = async(req, res) => {
+    const file = req.body.file;
+    const movimientoID = req.body.movimientoID;
+    const result = await cloudinary.v2.uploader.upload(file,{folder:`Coseinco/OrdenDeCompra/movimiento/${movimientoID}`})
+
+    res.status(200).json({
+        status: 'success',
+        url: result.url
+    });
+}
+
+const agregarInventario = async(req,res) => {
+    let dataBody = req.body.inventoryData;
+    try{
+        let productID = dataBody.productID;
+        let files = dataBody.files;
+        let inventoryItems = dataBody.inventoryItems;
+        let movimientoID = dataBody.movimientoID;
+
+        let movimientoObj = await Movimiento.findByIdAndUpdate(movimientoID,{
+            filesOC: files,
+            cantidadItems: inventoryItems.length,
+            datosItems: inventoryItems,
+            fechaCreacion: Date.now(),
+            tipoMovimiento: 'entrada',
+            productID: productID
+        });
+
+        let inventario = await Inventario.findOne({productoID:productID});  
+        for(i=0;i<inventoryItems.length;i++){
+
+            let nSerieObj = new Object();
+            nSerieObj.estado = "habilitado",
+            nSerieObj.numero = inventoryItems[i],
+            nSerieObj.fechaRegistro = movimientoObj.fechaCreacion,
+
+            inventario.nSerie.push(nSerieObj);
+
+        };
+        inventario.stock = inventario.stock + inventoryItems.length;
+
+        let inventarioRes = await Inventario.findByIdAndUpdate(inventario._id,{
+            nSerie: inventario.nSerie,
+            stock: inventario.stock
+        });
+        
+        res.status(200).json({
+            status: 'success',
+        })
+    }catch(err){
+        return res.status(500).json({
+            err
+        })
+    }
+}
 
 const getSeriesByProductId = async(req,res) => {
     let id = req.params.id;
@@ -66,5 +130,7 @@ const getInventarios = async(req,res)=>{
 
 module.exports ={
     getSeriesByProductId,
-    getInventarios
+    getInventarios,
+    OCompraURL,
+    agregarInventario
 }
