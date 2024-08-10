@@ -23,10 +23,7 @@ const Pedido = new Schema({
     observacion: String,
     datos: DatosSchema,
     estado: String,
-    docConfirmado:{
-        type:String,
-        default:""
-    }
+    files: Array
 },{
     versionKey: false
 });

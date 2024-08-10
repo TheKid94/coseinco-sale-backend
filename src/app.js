@@ -20,6 +20,7 @@ const proveedorRoutes = require('./routes/ProveedorRoutes');
 const oCompraRoutes = require('./routes/OCompraRoutes');
 const guiaRoutes = require('./routes/GuiaRoutes');
 const envioRoutes = require('./routes/EnvioRoutes');
+const documentoRoutes = require('./routes/DocumentoRoutes');
 
 const app = express();
 require('./database');
@@ -39,6 +40,7 @@ app.use('/api/detallePedido',detallePedidosRoutes);
 app.use('/api/usuario', usuarioRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/roles', rolRoutes);
+app.use('/api/documentos', documentoRoutes);
 
 //Routes - Admin
 app.use('/api-admin/inventario', inventarioRoutes);
