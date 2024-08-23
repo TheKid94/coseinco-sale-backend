@@ -5,8 +5,6 @@ const puppeteer = require('puppeteer');
 const hb = require('handlebars');
 const readFile = utils.promisify(fs.readFile);
 
-const sgMail = require('@sendgrid/mail');
-
 const cloudinary = require('cloudinary');
 
 cloudinary.config({
@@ -21,7 +19,6 @@ const Proveedor = require('../models/Proveedor');
 const Producto = require('../models/Producto');
 const Inventario = require('../models/Inventario');
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const getAll = async (req, res) => {
    let oCompras = await OCompra.find({});
@@ -195,21 +192,21 @@ const enviarNotificacion = async (req,res) => {
             }
             reshtml = reshtml.replace('#Productos', prod);
             reshtml = reshtml.replace('#Confirmacion', link);
-            const msg = {
-                to: proveedor.correo, // Change to your recipient
-                from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
-                subject: `Se ha generado una cotización de parte de Coseinco S.A.`,
-                html: reshtml
-            }
-            sgMail.send(msg).then(() => {
-                res.status(200).json({
-                    status: 'success',
-                });
-            }).catch((error) => {
-                res.status(401).json({
-                    error: error,
-                });
-            })
+            // const msg = {
+            //     to: proveedor.correo, // Change to your recipient
+            //     from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
+            //     subject: `Se ha generado una cotización de parte de Coseinco S.A.`,
+            //     html: reshtml
+            // }
+            // sgMail.send(msg).then(() => {
+            //     res.status(200).json({
+            //         status: 'success',
+            //     });
+            // }).catch((error) => {
+            //     res.status(401).json({
+            //         error: error,
+            //     });
+            // })
         }).catch(err => {
             res.status(500).json({
                 error: err
@@ -333,21 +330,25 @@ const OCompraGenerarDoc = async(req, res)=>{
                 };
             })
             await OCompra.findOneAndUpdate({numeroOC: compra.numeroOC},{url: resultcloud.url, estado:"procesado"});
-            const msg = {
-                to: proveedor.correo, // Change to your recipient
-                from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
-                subject: `Generación de Orden de Compra ${compra.numeroOC}`,
-                html: reshtml
-            }
-            sgMail.send(msg).then(() => {
-                res.status(200).json({
-                    status: 'success',
-                });
-            }).catch((error) => {
-                res.status(401).json({
-                    error: error,
-                });
-            })
+            // newFunction();
+
+            // function newFunction() {
+            //     const msg = {
+            //         to: proveedor.correo, // Change to your recipient
+            //         from: 'gustavo.troncos@urp.edu.pe', // Change to your verified sender
+            //         subject: `Generación de Orden de Compra ${compra.numeroOC}`,
+            //         html: reshtml
+            //     };
+            //     sgMail.send(msg).then(() => {
+            //         res.status(200).json({
+            //             status: 'success',
+            //         });
+            //     }).catch((error) => {
+            //         res.status(401).json({
+            //             error: error,
+            //         });
+            //     });
+            // }
         })
     }catch(err){
         res.status(500).json({
