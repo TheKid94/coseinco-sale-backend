@@ -40,10 +40,16 @@ const getProductoBySKU = async(req,res)=>{
         if(!producto)
         {
             return res.status(404).json({
-                message: 'No existe el producto o el numero de sku es invalido al producto que busca'
+                message: 'No existe el producto segun el numero sku'
             })
         }
-
+        let inventarioConStock = await Inventario.findOne({ stock: { $gt: 0 }, productoID: producto._id}).exec();
+        if(!inventarioConStock)
+        {
+            return res.status(400).json({
+                message: 'El producto no se encuentra disponible'
+            })
+        }
         res.status(200).json({
             status: 'success',
             producto
@@ -60,31 +66,34 @@ const getProductoBySKU = async(req,res)=>{
 
 const getProductosByCategoriaId = async(req,res)=>{
     let categoriaId = req.body.categoriaId;
-    try
-    {
-        let productos = await Producto.find({ categoriaID: categoriaId}); 
-        if(productos.length == 0)
-        {
+    try {
+        const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }, 'productoID').exec();
+        const productoIdsConStock = inventarioConStock.map(item => item.productoID);
+
+        const productosDisponibles = await Producto.find({
+            categoriaID: categoriaId,
+            _id: { $in: productoIdsConStock }
+        });
+
+        if (productosDisponibles.length === 0) {
             return res.status(404).json({
-                message: 'No hay productos'
-            })
+                message: 'No hay productos disponibles de acuerdo a la categoría'
+            });
         }
 
         res.status(200).json({
             status: 'success',
-            producto
-        })
-    }
-    catch(error)
-    {
+            productos: productosDisponibles
+        });
+    } catch (error) {
         res.status(500).json({
             error
-        })
+        });
     }
-   
 }
 
 module.exports = {
     getPedidoByNumberDoc,
-    getProductoBySKU
+    getProductoBySKU,
+    getProductosByCategoriaId
   };

@@ -3,6 +3,7 @@ const router = Router();
 const chatBotController = require('../controllers/ChatBotController')
 
 router.route('/pedidoByCliente').post(chatBotController.getPedidoByNumberDoc);
-router.route('/productoById').get(chatBotController.getProductoBySKU);
+router.route('/productoBySKU').post(chatBotController.getProductoBySKU);
+router.route('/productosByCategoriaId').post(chatBotController.getProductosByCategoriaId);
 
 module.exports = router;
