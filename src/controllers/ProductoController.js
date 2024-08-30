@@ -1,4 +1,4 @@
-const Marca = require('../models/Marca');
+const Inventario = require('../models/Inventario');
 const Producto = require('../models/Producto');
 const cloudinary = require('cloudinary');
 
@@ -48,6 +48,104 @@ const getAll = (req, res)=>{
             products,
         });
     });
+};
+
+const getAllCatalogo = async (req, res) => {
+    try {
+        // Obtener parámetros de paginación y filtros del query string
+        const page = parseInt(req.query.page) || 1; // Página actual
+        const limit = parseInt(req.query.limit) || 5; // Número de productos por página
+
+        // Parámetros de filtrado
+        const categoriaID = req.query.categoriaID ? req.query.categoriaID.split(',') : [];
+        const minVal = parseFloat(req.query.minVal) || 0;
+        const maxVal = parseFloat(req.query.maxVal) || Number.MAX_VALUE;
+        const marcaID = req.query.marcaID ? req.query.marcaID.split(',') : [];
+
+        // Validar los parámetros de paginación
+        if (page <= 0 || limit <= 0) {
+            return res.status(400).json({
+                message: 'Los parámetros de página y límite deben ser números positivos.'
+            });
+        }
+
+        // Calcular el número de documentos a omitir
+        const skip = (page - 1) * limit;
+
+        // Paso 1: Obtener los IDs de productos con stock > 0
+        const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }).exec();
+        const productoIdsConStock = inventarioConStock.map(item => item.productoID);
+
+        if (productoIdsConStock.length === 0) {
+            return res.status(404).json({
+                message: 'No hay productos con stock disponible.'
+            });
+        }
+
+        // Paso 2: Filtrar por categoríaID
+        /*let categoriaIDs = [];
+        if (categoriaFiltro.length > 0) {
+            const categorias = await Categoria.find({ _id: { $in: categoriaFiltro } }).exec();
+            categoriaIDs = categorias.map(cat => cat._id);
+        }*/
+
+        // Paso 3: Filtrar por marcaID
+        /*let marcaIDs = [];
+        if (marcaFiltro.length > 0) {
+            const marcas = await Marca.find({ _id: { $in: marcaFiltro } }).exec();
+            marcaIDs = marcas.map(marca => marca._id);
+        }*/
+
+        // Construir el objeto de filtro para la colección Producto
+        const filtro = {
+            _id: { $in: productoIdsConStock },
+            precio: { $gte: minVal, $lte: maxVal },
+            estado: 'habilitado'
+        };
+
+        if (categoriaID.length > 0) {
+            filtro.categoriaID = { $in: categoriaID };
+        }
+
+        if (marcaID.length > 0) {
+            filtro.marcaID = { $in: marcaID };
+        }
+
+        // Paso 4: Obtener los productos con los filtros aplicados
+        const productos = await Producto.find(filtro)
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // Obtener el stock para cada producto
+        const productosConStock = await Promise.all(productos.map(async (producto) => {
+            // Buscar el inventario para el producto actual
+            const inventario = await Inventario.findOne({ productoID: producto._id }).exec();
+            return {
+                ...producto.toObject(), // Convierte el documento Mongoose a un objeto JavaScript
+                stock: inventario ? inventario.stock : 0 // Asigna el stock, o 0 si no hay inventario
+            };
+        }));
+
+        // Contar el total de productos para saber cuántas páginas hay en total
+        const count = await Producto.countDocuments(filtro).exec();
+        const totalPages = Math.ceil(count / limit);
+
+        res.status(200).json({
+            status: 'success',
+            products: productosConStock,
+            pagination: {
+                totalItems: count,
+                currentPage: page,
+                totalPages,
+                itemsPerPage: limit
+            }
+        });
+        } catch (err) {
+        res.status(500).json({
+            message: `Error al realizar la petición: ${err}`
+        });
+        }
 };
 
 const productoCarrito = async (req, res, next) => {
@@ -218,5 +316,6 @@ module.exports = {
     ImagenProductoURL,
     inhabilitarProducto,
     habilitarProducto,
-    updateProducto
+    updateProducto,
+    getAllCatalogo
 }

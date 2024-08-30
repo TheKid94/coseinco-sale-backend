@@ -209,6 +209,13 @@ const getPedidoParaReservar = async (req, res) => {
       pedidoaux.constanciaEnvio = constanciaEnvio;
       pedidosres.push(pedidoaux);
     }
+
+    pedidosres = pedidosres.sort((a, b) => {
+      const dateA = new Date(a.fechaRegistro);
+      const dateB = new Date(b.fechaRegistro);
+      return dateB - dateA;
+    });
+
     res.status(200).json({
       status: "success",
       pedidosres,
