@@ -62,6 +62,8 @@ const getAllCatalogo = async (req, res) => {
         const maxVal = parseFloat(req.query.maxVal) || Number.MAX_VALUE;
         const marcaID = req.query.marcaID ? req.query.marcaID.split(',') : [];
 
+        const orden = parseInt(req.query.orden) || 1;
+
         // Validar los parámetros de paginación
         if (page <= 0 || limit <= 0) {
             return res.status(400).json({
@@ -82,20 +84,6 @@ const getAllCatalogo = async (req, res) => {
             });
         }
 
-        // Paso 2: Filtrar por categoríaID
-        /*let categoriaIDs = [];
-        if (categoriaFiltro.length > 0) {
-            const categorias = await Categoria.find({ _id: { $in: categoriaFiltro } }).exec();
-            categoriaIDs = categorias.map(cat => cat._id);
-        }*/
-
-        // Paso 3: Filtrar por marcaID
-        /*let marcaIDs = [];
-        if (marcaFiltro.length > 0) {
-            const marcas = await Marca.find({ _id: { $in: marcaFiltro } }).exec();
-            marcaIDs = marcas.map(marca => marca._id);
-        }*/
-
         // Construir el objeto de filtro para la colección Producto
         const filtro = {
             _id: { $in: productoIdsConStock },
@@ -111,8 +99,17 @@ const getAllCatalogo = async (req, res) => {
             filtro.marcaID = { $in: marcaID };
         }
 
+        // Construir el objeto de ordenamiento
+        const sort = {};
+        if (orden === 1) {
+            sort.precio = 1; // Ordenar de menor a mayor
+        } else if (orden === 2) {
+            sort.precio = -1; // Ordenar de mayor a menor
+        }
+
         // Paso 4: Obtener los productos con los filtros aplicados
         const productos = await Producto.find(filtro)
+            .sort(sort)
             .skip(skip)
             .limit(limit)
             .exec();
