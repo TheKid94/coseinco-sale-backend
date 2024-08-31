@@ -132,7 +132,7 @@ const createPedido = async (req, res) => {
     res.status(200).json({
       status: "success",
       pedido,
-      productos: items
+      productosped
     });
   } catch (error) {
     console.error("Error al crear el pedido:", error);
