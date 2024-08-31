@@ -150,8 +150,8 @@ const generarFilePago = async (pedido, detallePedido) => {
     const fechaEnt = pedido.fechaEntrega;
 
     reshtml = reshtml.replace('#CodigoVenta', pedido.codigoPedido);
-    reshtml = reshtml.replace('#FechaRegistro', `${fechaReg.getDate() + 1}/${fechaReg.getMonth() + 1}/${fechaReg.getFullYear()}`);
-    reshtml = reshtml.replace('#FechaLlegada', `${fechaEnt.getDate() + 1}/${fechaEnt.getMonth() + 1}/${fechaEnt.getFullYear()}`);
+    reshtml = reshtml.replace('#FechaRegistro', `${fechaReg.getDate()}/${fechaReg.getMonth() + 1}/${fechaReg.getFullYear()}`);
+    reshtml = reshtml.replace('#FechaLlegada', `${fechaEnt.getDate()}/${fechaEnt.getMonth() + 1}/${fechaEnt.getFullYear()}`);
     reshtml = reshtml.replace('#Cliente', `${pedido.datos.name} ${pedido.datos.lastName}`);
     reshtml = reshtml.replace('#Correo', pedido.datos.email);
     reshtml = reshtml.replace('#TipoDocumento', pedido.datos.documentType);
