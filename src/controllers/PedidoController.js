@@ -263,51 +263,105 @@ const ConstanciaEnviotoURL = async(req, res) => {
 }
 
 const getPedidoParaReservar = async (req, res) => {
-  let pedidos = await Pedido.find({});
-  let pedidosres = [];
   try {
-    if (!pedidos) {
+    // Obtener parámetros de paginación de la solicitud
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const type = parseInt(req.query.type, 10) || 1;
+    const name = req.query.name || '';
+
+    if( type > 2){
       return res.status(404).json({
-        message: "No existen los pedidos",
+        message: "El tipo solicitado no es válido.",
       });
     }
-    for (var i = 0; i < pedidos.length; i++) {
-      let pedidoaux = new Object();
-      let cantidades = 0;
-      pedidoaux.id = pedidos[i]._id;
-      pedidoaux.codigo = pedidos[i].codigoPedido;
-      pedidoaux.cliente = pedidos[i].datos;
-      let detallPedido = await DetallePedido.findOne({
-        pedidoID: pedidos[i]._id,
+
+    // Calcular el número de documentos a saltar
+    const skip = (page - 1) * limit;
+
+    // Construir el filtro por estado
+    const filtro = {};
+    if (type == 1) {
+      filtro.estado = { $in: ['generado', 'reservado', 'empaquetado'] }; // Flujo reserva
+    } else if (type == 2) {
+      filtro.estado = { $in: ['empaquetado', 'enviado', 'finalizado'] }; // Flujo envio
+    }
+
+    if (name && name.trim() !== '') {
+      // Crear expresión regular para la búsqueda insensible a mayúsculas/minúsculas
+      const regex = new RegExp(name, 'i');
+      
+      // Agregar el filtro de nombre y apellido al filtro existente
+      filtro.$or = [
+        { 'datos.name': { $regex: regex } },
+        { 'datos.lastName': { $regex: regex } }
+      ];
+    }
+
+    // Obtener los pedidos con paginación
+    const pedidos = await Pedido.find(filtro)
+      .skip(skip)
+      .limit(limit)
+      .sort({ fechaRegistro: 1 }); //orden ascendente, -1 para descendente
+
+    if (!pedidos.length) {
+      return res.status(404).json({
+        cod: 1,
+        message: "No se ha encontrado pedidos",
       });
-      for (var j = 0; j < detallPedido.productos.length; j++) {
-        cantidades += detallPedido.productos[j].cantidad;
+    }
+
+    // Procesar los pedidos
+    const pedidosres = [];
+    for (const pedido of pedidos) {
+      const pedidoaux = {};
+      let cantidades = 0;
+
+      pedidoaux.id = pedido._id;
+      pedidoaux.codigo = pedido.codigoPedido;
+      pedidoaux.cliente = pedido.datos;
+
+      const detallPedido = await DetallePedido.findOne({
+        pedidoID: pedido._id,
+      });
+
+      for (const producto of detallPedido.productos) {
+        cantidades += producto.cantidad;
       }
+
       pedidoaux.cantidad = cantidades;
-      pedidoaux.fechaRegistro = pedidos[i].fechaRegistro;
-      pedidoaux.estado = pedidos[i].estado;
-      let guiaaux = await Guia.findOne({codigoPedido: pedidos[i].codigoPedido});
-      let envioaux = await Envio.findOne({pedidoID: pedidos[i]._id});
-      let url = (!guiaaux) ? "":guiaaux.url;
-      let constanciaEnvio = (!envioaux) ? "":envioaux.constanciaEnvio;
-      pedidoaux.url = url;
-      pedidoaux.constanciaEnvio = constanciaEnvio;
+      pedidoaux.fechaRegistro = pedido.fechaRegistro;
+      pedidoaux.fechaEntrega = pedido.fechaEntrega;
+      pedidoaux.estado = pedido.estado;
+
+      const guiaaux = await Guia.findOne({codigoPedido: pedido.codigoPedido});
+      const envioaux = await Envio.findOne({pedidoID: pedido._id});
+
+      pedidoaux.url = guiaaux ? guiaaux.url : "";
+      pedidoaux.constanciaEnvio = envioaux ? envioaux.constanciaEnvio : "";
+
       pedidosres.push(pedidoaux);
     }
 
-    pedidosres = pedidosres.sort((a, b) => {
-      const dateA = new Date(a.fechaRegistro);
-      const dateB = new Date(b.fechaRegistro);
-      return dateB - dateA;
-    });
+    // Obtener el total de pedidos para calcular la paginación
+    const totalPedidos = await Pedido.countDocuments(filtro).exec();
+    const totalPages = Math.ceil(totalPedidos / limit);
 
+    // Responder con los datos y la información de paginación
     res.status(200).json({
       status: "success",
       pedidosres,
+      pagination: {
+        totalItems: totalPedidos,
+        currentPage: page,
+        totalPages,
+        itemsPerPage: limit
+      }
     });
+
   } catch (error) {
     res.status(500).json({
-      error,
+      error: error.message,
     });
   }
 };
