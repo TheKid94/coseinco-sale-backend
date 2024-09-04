@@ -127,8 +127,10 @@ const createPedido = async (req, res) => {
     const detallePedido = await DetallePedido.create(newDetallePedido);
 
     // Generación de archivo PDF y envío por correo
-    await generarFilePago(pedido, detallePedido);
+    let filePago = await generarFilePago(pedido, detallePedido);
 
+    pedido.files.push(filePago);
+    
     res.status(200).json({
       status: "success",
       pedido,
@@ -149,6 +151,7 @@ const generarFilePago = async (pedido, detallePedido) => {
     const fechaReg = pedido.fechaRegistro;
     const fechaEnt = pedido.fechaEntrega;
 
+    reshtml = reshtml.replace('#TipoDeDoc', pedido.datos.documentType == 'RUC' ? 'Factura de Venta' : 'Boleta de Venta');
     reshtml = reshtml.replace('#CodigoVenta', pedido.codigoPedido);
     reshtml = reshtml.replace('#FechaRegistro', `${fechaReg.getDate() + 1}/${fechaReg.getMonth() + 1}/${fechaReg.getFullYear()}`);
     reshtml = reshtml.replace('#FechaLlegada', `${fechaEnt.getDate() + 1}/${fechaEnt.getMonth() + 1}/${fechaEnt.getFullYear()}`);
@@ -158,11 +161,16 @@ const generarFilePago = async (pedido, detallePedido) => {
     reshtml = reshtml.replace('#NumDocumento', pedido.datos.numberDoc);
 
     detallePedido.productos.forEach(producto => {
-      prod += `<tr class="item"><td>${producto.nombre}</td><td>${producto.SKU}</td><td>${producto.cantidad}</td><td>${producto.subtotal}</td></tr>`;
+      prod += `<tr class="item"><td>${producto.nombre}</td><td>${producto.SKU}</td><td>${producto.cantidad}</td><td>$ ${producto.subtotal.toFixed(2)}</td></tr>`;
     });
 
+    let opGrav = parseFloat((detallePedido.totalPrecio / 1.18).toFixed(2));
+    let igv = parseFloat((detallePedido.totalPrecio - opGrav).toFixed(2));
+    let total = parseFloat(detallePedido.totalPrecio.toFixed(2));
     reshtml = reshtml.replace('#Productos', prod);
-    reshtml = reshtml.replace('#Total', `<strong style="float: right; margin-right: 45px;">Total: ${detallePedido.totalPrecio}</strong>`);
+    reshtml = reshtml.replace('#OpGravadas', `<strong style="float: right; margin-right: 45px;">Op.Gravadas: $ ${opGrav.toFixed(2)}</strong>`);
+    reshtml = reshtml.replace('#IGV', `<strong style="float: right; margin-right: 45px;">IGV: $ ${igv.toFixed(2)}</strong>`);
+    reshtml = reshtml.replace('#Total', `<strong style="float: right; margin-right: 45px;">Total: $ ${total.toFixed(2)}</strong>`);
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -196,6 +204,7 @@ const generarFilePago = async (pedido, detallePedido) => {
       }
     });
 
+    return resultcloud.url;
   } catch (err) {
     console.error("Error en generarFilePago:", err);
     throw new Error(err.message);
