@@ -50,6 +50,25 @@ const getUser = (req, res) => {
 
 }
 
+const getLogin = async (req, res) =>{
+    try{
+        const user = await Usuario.findOne({nombreUsuario: req.usuario, password: req.password});
+        if(!user){
+            res.status(404).json({
+                message: 'No existe el usuario'
+            })
+        }
+        res.status(200).json({
+            status: 'success',
+            user
+        });
+    }catch(err){
+        res.status(500).json({
+            status: err
+        })
+    }
+}
+
 const getUserConductores = async (req, res) => {
     try
     {
@@ -118,6 +137,7 @@ const eliminateImage = async(req, res) => {
 module.exports = {
     getAll,
     getUser,
+    getLogin,
     getUserConductores,
     getUsersAdmin,
     eliminateImage
