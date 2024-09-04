@@ -199,8 +199,8 @@ const createProducto = async (req, res) => {
         newProducto.codigoFabricante = producto.manufacturer;
         newProducto.caracteristica = producto.feature;
         newProducto.imagenes = producto.images;
+        newProducto.categoriaID = producto.categoriadId; 
         newProducto.estado = "habilitado"; 
-         
 
         if (producto.length == 0 || Object.keys(producto).length == 0) {
             res.status(400).json({
