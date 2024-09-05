@@ -1,5 +1,6 @@
 const Inventario = require('../models/Inventario');
 const Producto = require('../models/Producto');
+const Marca = require('../models/Marca');
 const cloudinary = require('cloudinary');
 
 cloudinary.config({
@@ -151,7 +152,11 @@ const productoCarrito = async (req, res, next) => {
         let carritoProducto = [];
         for(i=0;i<productoid.length;i++){
             let producto = await Producto.findById(productoid[i]);
-            carritoProducto.push(producto);
+            let marca = await Marca.findById(producto.marcaID);
+
+            let productoObject = producto.toObject();
+            productoObject.marca = marca.nombre;
+            carritoProducto.push(productoObject);
         };
         res.status(200).json({
             status: 'success',
