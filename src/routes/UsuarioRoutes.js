@@ -4,6 +4,7 @@ const usuarioController = require('../controllers/UsuarioController')
 
 router.route('/').get(usuarioController.getAll);
 router.route('/getUsuario/:id').get(usuarioController.getUser);
+router.route('/login').post(usuarioController.getLogin);
 router.route('/getConductores').get(usuarioController.getUserConductores);
 router.route('/getUsariosAdmin').get(usuarioController.getUsersAdmin);
 
