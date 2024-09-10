@@ -2,6 +2,7 @@ const Pedido = require("../models/Pedido");
 const DetallePedido = require("../models/DetallePedido");
 const Producto = require("../models/Producto");
 const Inventario = require("../models/Inventario");
+const Envio = require("../models/Envio");
 
 const getPedidoByNumberDoc = async(req,res)=>{
     let numDoc = req.body.numeroDoc;
@@ -9,7 +10,8 @@ const getPedidoByNumberDoc = async(req,res)=>{
     try
     {
         let pedido = await Pedido.findOne({ codigoPedido: numPedido, 'datos.numberDoc': numDoc});
-        let detallePedido = await DetallePedido.findOne({ pedidoID: pedido._id}); 
+        let detallePedido = await DetallePedido.findOne({ pedidoID: pedido._id});
+        let envioPedido = await Envio.findOne({ pedidoID: pedido._id});
         if(!pedido)
         {
             return res.status(404).json({
@@ -20,7 +22,8 @@ const getPedidoByNumberDoc = async(req,res)=>{
         res.status(200).json({
             status: 'success',
             pedido,
-            productos: detallePedido.productos
+            productos: detallePedido.productos,
+            envio: envioPedido
         })
     }
     catch(error)
