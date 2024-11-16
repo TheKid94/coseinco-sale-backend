@@ -1,7 +1,7 @@
 const Inventario = require('../models/Inventario');
 const Producto = require('../models/Producto');
 const Marca = require('../models/Marca');
-const Movimiento = require('../models/Movimiento');
+const MovimientoEntrada = require('../models/MovimientoEntrada');
 const cloudinary = require('cloudinary');
 
 cloudinary.config({
@@ -13,12 +13,21 @@ cloudinary.config({
 const OCompraURL = async(req, res) => {
     const file = req.body.file;
     const movimientoID = req.body.movimientoID;
-    const result = await cloudinary.v2.uploader.upload(file,{folder:`Coseinco/OrdenDeCompra/movimiento/${movimientoID}`})
 
-    res.status(200).json({
-        status: 'success',
-        url: result.url
-    });
+    try
+    {
+        const result = await cloudinary.v2.uploader.upload(file,{folder:`Coseinco/OrdenDeCompra/movimiento/${movimientoID}`})
+
+        res.status(200).json({
+            status: 'success',
+            url: result.url
+        });
+
+    } catch(err){
+        return res.status(500).json({
+            err
+        })
+    }
 }
 
 const agregarInventario = async(req,res) => {
@@ -29,12 +38,13 @@ const agregarInventario = async(req,res) => {
         let inventoryItems = dataBody.inventoryItems;
         let movimientoID = dataBody.movimientoID;
 
-        let movimientoObj = await Movimiento.findByIdAndUpdate(movimientoID,{
-            filesOC: files,
-            cantidadItems: inventoryItems.length,
-            datosItems: inventoryItems,
+        const precioCompraTotal = inventoryItems.reduce((acumulador, producto) => acumulador + producto.precioCompra, 0);
+
+        let movimientoObj = await MovimientoEntrada.findByIdAndUpdate(movimientoID,{
+            archivosAdjuntos: files,
+            datos: inventoryItems,
+            precioCompraTotal: precioCompraTotal,
             fechaCreacion: Date.now(),
-            tipoMovimiento: 'entrada',
             productID: productID
         });
 
@@ -43,7 +53,8 @@ const agregarInventario = async(req,res) => {
 
             let nSerieObj = new Object();
             nSerieObj.estado = "habilitado",
-            nSerieObj.numero = inventoryItems[i],
+            nSerieObj.nroSerie = inventoryItems[i].nroSerie,
+            nSerieObj.precioCompra = inventoryItems[i].precioCompra,
             nSerieObj.fechaRegistro = movimientoObj.fechaCreacion,
 
             inventario.nSerie.push(nSerieObj);

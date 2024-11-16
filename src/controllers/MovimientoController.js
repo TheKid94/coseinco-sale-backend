@@ -1,17 +1,16 @@
-const Movimiento = require('../models/Movimiento');
+const MovimientoEntrada = require('../models/MovimientoEntrada');
 
 const createMovimientoBasico = async (req, res) => {
     try {
       
         let newMovimiento = new Object();
+        newMovimiento.archivosAdjuntos = [];
+        newMovimiento.nSerie = "";
+        newMovimiento.precioCompra = 0.00;
         newMovimiento.fechaCreacion = Date.now();
-        newMovimiento.datosItems = [];
-        newMovimiento.cantidadItems = 0;
-        newMovimiento.filesOC = [];
-        newMovimiento.tipoMovimiento = "entrada";
         newMovimiento.productID = "";
 
-        let movRes = await Movimiento.create(newMovimiento);
+        let movRes = await MovimientoEntrada.create(newMovimiento);
         let movID = movRes._id;
         
         res.status(200).json({

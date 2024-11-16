@@ -12,7 +12,6 @@ const Producto = new Schema({
     imagenes: Array,
     caracteristica: String, 
     estado: String,
-    categoriaID: String
 },{
     versionKey: false
 });

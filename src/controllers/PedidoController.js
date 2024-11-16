@@ -8,6 +8,7 @@ const Rol = require("../models/Rol");
 const Usuario = require("../models/Usuario");
 const Inventario = require("../models/Inventario");
 const Envio = require("../models/Envio");
+const MovimientoSalida = require('../models/MovimientoSalida');
 
 const fs = require('fs');
 const path = require('path');
@@ -82,7 +83,9 @@ const createPedido = async (req, res) => {
     const newPedido = {
       codigoPedido: `P${(nPedidos + 1).toString().padStart(5, "0")}`,
       fechaRegistro: new Date(),
-      fechaEntrega: new Date(Date.now() + 2 * 24 * 3600 * 1000), // 2 días después
+      fechaReserva: null,
+      fechaEmpaquetado: null,
+      fechaEntrega: new Date(Date.now() + 10 * 24 * 3600 * 1000),
       precioVenta: 0,
       observacion: "No hay observaciones",
       estado: "generado",
@@ -248,6 +251,12 @@ const EnviarPedido = async(req, res) =>{
   let docConfirm = req.body.doc;
   try{
     let pedido = await Pedido.findOne({codigoPedido: codigoPedido});
+
+    let movimientoSalida = await MovimientoSalida.findOne({pedidoID: pedido._id});  
+    await MovimientoSalida.findByIdAndUpdate(movimientoSalida._id,{
+      archivosAdjuntos: docConfirm
+    });
+
     await Pedido.findOneAndUpdate({codigoPedido:codigoPedido}, {estado:"finalizado"})
     await Envio.findOneAndUpdate({pedidoID: pedido._id},{constanciaEnvio: docConfirm})
     res.status(200).json({
@@ -340,6 +349,8 @@ const getPedidoParaReservar = async (req, res) => {
 
       pedidoaux.cantidad = cantidades;
       pedidoaux.fechaRegistro = pedido.fechaRegistro;
+      pedidoaux.fechaReserva = pedido.fechaReserva;
+      pedidoaux.fechaEmpaquetado = pedido.fechaEmpaquetado;
       pedidoaux.fechaEntrega = pedido.fechaEntrega;
       pedidoaux.estado = pedido.estado;
 
@@ -348,6 +359,7 @@ const getPedidoParaReservar = async (req, res) => {
 
       pedidoaux.url = guiaaux ? guiaaux.url : "";
       pedidoaux.constanciaEnvio = envioaux ? envioaux.constanciaEnvio : "";
+      pedidoaux.fechaEnvio = envioaux ? envioaux.fechaEnvio : "";
 
       pedidosres.push(pedidoaux);
     }

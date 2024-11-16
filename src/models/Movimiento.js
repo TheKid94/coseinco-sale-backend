@@ -1,15 +1,19 @@
 const { Schema, model } = require('mongoose');
 
 const Movimiento = new Schema({
-    filesOC: Array,
-    cantidadItems: Number,
-    datosItems: Array,
+    archivosAdjuntos: Array,
+    datos: datos,
     fechaCreacion: Date,
     tipoMovimiento: String,
-    productID: String
+    productID: String,
+    pedidoID: String
 },{
     versionKey: false
 });
 
-module.exports = model('Movimiento', Movimiento, 'Movimiento');
+const datos = new Schema({
+    nroSerie: String,
+    precioMovimiento: Number
+}, { _id: false });
 
+module.exports = model('Movimiento', Movimiento, 'Movimiento');

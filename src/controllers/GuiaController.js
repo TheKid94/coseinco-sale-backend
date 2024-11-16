@@ -55,7 +55,7 @@ const createGuia = async(req, res) => {
             let stockReserve = [];
             let myArray = transformArray(instock.nSerie);
             for(var j=0;j<productos[i].serialNumbers.length;j++){
-                let prod = myArray.find(x=>x.numero == productos[i].serialNumbers[j]);
+                let prod = myArray.find(x=>x.nroSerie == productos[i].serialNumbers[j]);
                 prod.estado = 'reservado';
                 stockReserve.push(prod);
             }
@@ -71,7 +71,7 @@ const createGuia = async(req, res) => {
             )
             nseries.push(productos[i]);
         };
-        await Pedido.findOneAndUpdate({codigoPedido:pedidoscod},{"estado":"reservado"});
+        await Pedido.findOneAndUpdate({codigoPedido:pedidoscod},{"estado":"reservado", "fechaReserva": new Date()});
         let nGuias = await Guia.find({});
         guia.codigoPedido = pedidoscod;
         guia.codigoGuia = "G" + `${nGuias.length + 1}`.padStart(5, "0");
@@ -147,7 +147,7 @@ const createGuiaPDF = async(req, res) =>{
                 };
             })
             await Guia.findOneAndUpdate({codigoPedido: codigoped},{"url": resultcloud.url})
-            await Pedido.findOneAndUpdate({codigoPedido: codigoped},{"estado": "empaquetado"})
+            await Pedido.findOneAndUpdate({codigoPedido: codigoped},{"estado": "empaquetado", "fechaEmpaquetado": new Date()})
             res.status(200).json({
                 status: 'success'
             })

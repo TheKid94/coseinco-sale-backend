@@ -18,6 +18,8 @@ const DatosSchema = new Schema({
 const Pedido = new Schema({
     codigoPedido: String,
     fechaRegistro: Date,
+    fechaReserva: Date,
+    fechaEmpaquetado: Date,
     fechaEntrega: Date,
     precioVenta: Number,
     observacion: String,

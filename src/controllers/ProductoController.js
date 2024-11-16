@@ -199,8 +199,8 @@ const createProducto = async (req, res) => {
         newProducto.marcaID = producto.brand;
         newProducto.SKU = producto.sku;
         newProducto.nombre = producto.name;
-        newProducto.precio = producto.salePrice;
-        newProducto.precioCompra = producto.purchasePrice;
+        newProducto.precio = parseFloat(producto.salePrice);
+        newProducto.precioCompra = parseFloat(producto.purchasePrice);
         newProducto.codigoFabricante = producto.manufacturer;
         newProducto.caracteristica = producto.feature;
         newProducto.imagenes = producto.images;
@@ -214,7 +214,15 @@ const createProducto = async (req, res) => {
             return false;
         }
 
-        let productoRes = await Producto.create(newProducto);      
+        let productoRes = await Producto.create(newProducto);
+
+        let newInventario = new Object();
+        newInventario.fechaRegistro = Date.now();
+        newInventario.productoID = productoRes._id;
+        newInventario.nSerie = [];
+        newInventario.stock = 0;
+
+        await Inventario.create(newInventario);
       
         res.status(200).json({
             status: "success",
