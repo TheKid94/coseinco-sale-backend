@@ -5,7 +5,6 @@ const Producto = new Schema({
     categoriaID:String,
     nombre: String,
     precio: Number,
-    precioCompra:Number,
     stock: Number,
     codigoFabricante: String,
     SKU: String,

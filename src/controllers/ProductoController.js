@@ -75,19 +75,18 @@ const getAllCatalogo = async (req, res) => {
         // Calcular el número de documentos a omitir
         const skip = (page - 1) * limit;
 
-        // Paso 1: Obtener los IDs de productos con stock > 0
-        const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }).exec();
+        // Paso 1: Obtener los IDs de productos con stock > 0 || No necesitamos validar stock
+        /*const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }).exec();
         const productoIdsConStock = inventarioConStock.map(item => item.productoID);
 
         if (productoIdsConStock.length === 0) {
             return res.status(404).json({
                 message: 'No hay productos con stock disponible.'
             });
-        }
+        }*/
 
-        // Construir el objeto de filtro para la colección Producto
+        // Construir el objeto de filtro para la colección Producto || _id: { $in: productoIdsConStock },
         const filtro = {
-            _id: { $in: productoIdsConStock },
             precio: { $gte: minVal, $lte: maxVal },
             estado: 'habilitado'
         };
@@ -168,28 +167,7 @@ const productoCarrito = async (req, res, next) => {
     }
 }
 
-const getAllProductoCompra = async (req, res) => {
-    let productos = [];
-    try{
-        let productList = await Producto.find({});
-        for(var i=0;i<productList.length;i++){
-            let productAux = new Object();
-            productAux.id = productList[i]._id;
-            productAux.nombre = productList[i].nombre;
-            productAux.precioCompra = productList[i].precioCompra;
-            productAux.imagen = productList[i].imagenes[0];
-            productos.push(productAux);
-        }
-        res.status(200).json({
-            status:'success',
-            productos
-        })
-    }catch(err){
-        res.status(500).json({
-            error: err
-        })
-    }
-}
+
 
 const createProducto = async (req, res) => {
     try {
@@ -200,7 +178,6 @@ const createProducto = async (req, res) => {
         newProducto.SKU = producto.sku;
         newProducto.nombre = producto.name;
         newProducto.precio = parseFloat(producto.salePrice);
-        newProducto.precioCompra = parseFloat(producto.purchasePrice);
         newProducto.codigoFabricante = producto.manufacturer;
         newProducto.caracteristica = producto.feature;
         newProducto.imagenes = producto.images;
@@ -245,7 +222,6 @@ const updateProducto = async (req, res) => {
         newProducto.SKU = producto.sku;
         newProducto.nombre = producto.name;
         newProducto.precio = producto.salePrice;
-        newProducto.precioCompra = producto.purchasePrice;
         newProducto.codigoFabricante = producto.manufacturer;
         newProducto.caracteristica = producto.feature;
         newProducto.categoriaID = producto.category;
@@ -262,7 +238,6 @@ const updateProducto = async (req, res) => {
             SKU: newProducto.SKU,
             nombre: newProducto.nombre,
             precio: newProducto.precio,
-            precioCompra: newProducto.precioCompra,
             codigoFabricante: newProducto.codigoFabricante,
             caracteristica: newProducto.caracteristica
         });
@@ -317,9 +292,33 @@ const habilitarProducto = async (req, res) => {
         })
     }
 }
+
+//NOT USED
+/*const getAllProductoCompra = async (req, res) => {
+    let productos = [];
+    try{
+        let productList = await Producto.find({});
+        for(var i=0;i<productList.length;i++){
+            let productAux = new Object();
+            productAux.id = productList[i]._id;
+            productAux.nombre = productList[i].nombre;
+            productAux.precioCompra = productList[i].precioCompra;
+            productAux.imagen = productList[i].imagenes[0];
+            productos.push(productAux);
+        }
+        res.status(200).json({
+            status:'success',
+            productos
+        })
+    }catch(err){
+        res.status(500).json({
+            error: err
+        })
+    }
+}*/
+
 module.exports = {
     getAll,
-    getAllProductoCompra,
     getOne,
     productoCarrito,
     createProducto,
