@@ -62,8 +62,8 @@ const getAllCatalogo = async (req, res) => {
         const minVal = parseFloat(req.query.minVal) || 0;
         const maxVal = parseFloat(req.query.maxVal) || Number.MAX_VALUE;
         const marcaID = req.query.marcaID ? req.query.marcaID.split(',') : [];
-
         const orden = parseInt(req.query.orden) || 1;
+        const searchText = req.query.search || "";
 
         // Validar los parámetros de paginación
         if (page <= 0 || limit <= 0) {
@@ -97,6 +97,17 @@ const getAllCatalogo = async (req, res) => {
 
         if (marcaID.length > 0) {
             filtro.marcaID = { $in: marcaID };
+        }
+
+        // Lógica para búsqueda por texto
+        if (searchText.trim()) {
+            const palabras = searchText.split(' ').filter(p => p.trim()); // Separar palabras
+            filtro.$or = palabras.map(palabra => ({
+                $or: [
+                    { nombre: { $regex: palabra, $options: 'i' } }, // Busca en "nombre"
+                    { caracteristica: { $regex: palabra, $options: 'i' } } // Busca en "descripcion"
+                ]
+            }));
         }
 
         // Construir el objeto de ordenamiento
