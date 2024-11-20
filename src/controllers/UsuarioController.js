@@ -91,24 +91,30 @@ const getUserConductores = async (req, res) => {
 }
 
 const getUsersAdmin = async (req, res) => {
-    try
-    {
-        const rol = await Rol.findOne({nombre:"Cliente"});
+    try {
+        const rol = await Rol.findOne({ nombre: "Cliente" });
         const listaUsers = await Usuario.find({});
-        const listaUsuario = [];
-        for(var i=0;i<listaUsers.length;i++){
-            if(listaUsers[i].rolID != rol._id){
-                listaUsuario.push(listaUsers[i]);
-            }
-        }
+        const users = await Promise.all(
+            listaUsers.map(async (user) => {
+                if (user.rolID.toString() !== rol._id.toString()) { 
+                    const rolTemp = await Rol.findById(user.rolID);
+                    return {
+                        ...user.toObject(), 
+                        rol: rolTemp ? rolTemp.nombre : null,
+                    };
+                }
+                return null;
+            })
+        );
+    
         res.status(200).json({
-            status: 'success',
-            listaUsuario
+            status: "success",
+            users: users.filter(Boolean),
         });
-    } catch(err)
-    {
+    } catch (err) {
         res.status(500).json({
-            status: err
+            status: "error",
+            message: err.message,
         });
     }
 }
