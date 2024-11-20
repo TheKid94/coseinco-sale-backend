@@ -252,10 +252,10 @@ const EnviarPedido = async(req, res) =>{
   try{
     let pedido = await Pedido.findOne({codigoPedido: codigoPedido});
 
-    let movimientoSalida = await MovimientoSalida.findOne({pedidoID: pedido._id});  
-    await MovimientoSalida.findByIdAndUpdate(movimientoSalida._id,{
-      archivosAdjuntos: docConfirm
-    });
+    const resultado = await MovimientoSalida.updateMany(
+      { pedidoID: pedido._id }, // Condición
+      { $set: { archivosAdjuntos: docConfirm } } // Actualización
+  );
 
     await Pedido.findOneAndUpdate({codigoPedido:codigoPedido}, {estado:"finalizado"})
     await Envio.findOneAndUpdate({pedidoID: pedido._id},{constanciaEnvio: docConfirm})

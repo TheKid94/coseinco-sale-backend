@@ -4,7 +4,9 @@ const MovimientoSalida = new Schema({
     archivosAdjuntos: String,
     datos: Array,
     fechaCreacion: Date,
+    precioUnitario: Number,
     precioVentaTotal: Number,
+    productoID: String,
     pedidoID: String
 },{
     versionKey: false
