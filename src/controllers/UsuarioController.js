@@ -66,7 +66,7 @@ const getLogin = async (req, res) =>{
         const allowedRoles = ["Administrador", "Jefe Almacen", "Gerente"];
 
         const userObject = user.toObject();
-        userObject.nombre = rol.nombre;
+        userObject.nombreRol = rol.nombre;
         // Verifica si al menos uno de los roles del usuario está permitido
         const hasAllowedRole = allowedRoles.some(
             allowedRole => allowedRole.toLowerCase() === rol.nombre.toLowerCase()
