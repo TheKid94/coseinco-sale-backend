@@ -117,31 +117,133 @@ const getUserConductores = async (req, res) => {
 }
 
 const getUsersAdmin = async (req, res) => {
-    try
-    {
-        const rol = await Rol.findOne({nombre:"Cliente"});
+    try {
+        const rol = await Rol.findOne({ nombre: "Cliente" });
         const listaUsers = await Usuario.find({});
-        const listaUsuario = [];
-        for(var i=0;i<listaUsers.length;i++){
-            if(listaUsers[i].rolID != rol._id){
-                listaUsuario.push(listaUsers[i]);
-            }
-        }
+        const users = await Promise.all(
+            listaUsers.map(async (user) => {
+                if (user.rolID.toString() !== rol._id.toString()) { 
+                    const rolTemp = await Rol.findById(user.rolID);
+                    return {
+                        ...user.toObject(), 
+                        rol: rolTemp ? rolTemp.nombre : null,
+                    };
+                }
+                return null;
+            })
+        );
+    
         res.status(200).json({
-            status: 'success',
-            listaUsuario
+            status: "success",
+            users: users.filter(Boolean),
         });
-    } catch(err)
-    {
+    } catch (err) {
         res.status(500).json({
-            status: err
+            status: "error",
+            message: err.message,
         });
     }
 }
 
 const createUser = async(req, res) =>{
-    
+    try {
+
+        const { usuario, datos } = req.body;
+        
+        // Validación de entrada
+        if (!usuario || Object.keys(usuario).length === 0 || !datos || Object.keys(datos).length === 0) {
+          return res.status(400).json({ status: "error", message: "Datos de entrada inválidos" });
+        }
+
+        // Inicialización del pedido
+        const newUsuario = {
+          nombreUsuario: usuario.nombreUsuario,
+          rolID: usuario.rolID,
+          password: usuario.password,
+          estado: "habilitado",
+          datos: datos
+        };
+        
+        let usuarioRes = await Usuario.create(newUsuario);
+        
+        res.status(200).json({
+          status: "success",
+          usuarioRes
+        });
+
+      } catch (error) {
+        console.error("Error al crear el usuario:", error);
+        res.status(500).json({ status: "error", message: error.message });
+      }
 }
+
+const updateUser = async(req, res) => {
+    try {
+      
+        let usuario = req.body.usuario;
+        let id = usuario._id;
+
+        if (usuario.length == 0 || Object.keys(usuario).length == 0) {
+            res.status(400).json({
+            status: "error",
+            });
+            return false;
+        }
+
+        let usuarioRes = await Usuario.findByIdAndUpdate(id,{
+            nombreUsuario: usuario.nombreUsuario,
+            password: usuario.password,
+            rolID: usuario.rolID,
+            datos: usuario.datos
+        });
+      
+        res.status(200).json({
+            status: "success",
+            usuarioRes
+        });
+    } catch (error) {
+        res.status(500).json({
+            error
+        });
+    }
+}
+
+const stateChangeUser = async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({
+                status: "fail",
+                message: "El ID del usuario es requerido.",
+            });
+        }
+
+        const usuario = await Usuario.findById(id);
+
+        if (!usuario) {
+            return res.status(404).json({
+                status: "fail",
+                message: "Usuario no encontrado.",
+            });
+        }
+
+        const nuevoEstado = usuario.estado === "habilitado" ? "deshabilitado" : "habilitado";
+
+        await Usuario.findByIdAndUpdate(id, { estado: nuevoEstado });
+
+        res.status(200).json({
+            status: "success",
+            message: `El estado del usuario ha sido cambiado a ${nuevoEstado}.`,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            status: "error",
+            message: "Ocurrió un error al cambiar el estado del usuario.",
+            error: error.message,
+        });
+    }
+};
 
 const eliminateImage = async(req, res) => {
     try
@@ -166,5 +268,8 @@ module.exports = {
     getLogin,
     getUserConductores,
     getUsersAdmin,
-    eliminateImage
+    eliminateImage,
+    createUser,
+    updateUser,
+    stateChangeUser
 }

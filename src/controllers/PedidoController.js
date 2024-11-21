@@ -426,25 +426,24 @@ const getPedidoReservabyId = async(req,res)=>{
 
 const GetDashboardPedidos = async(req,res) =>{
   try{
-    let pedidos = await Pedido.find({});
-    let compras = await OCompra.find({});
-    let usuarios = await Usuario.find({});
-    let inventarios = await Inventario.find({});
+    const [pedidos, usuarios, inventarios] = await Promise.all([
+      Pedido.find({}),
+      Usuario.find({}),
+      Inventario.find({})
+    ]);
     let donutPedidos = GetDonutPedidos(pedidos);
-    let donutCompras = GetDonutCompras(compras);
     let clientes = await GetClientes(usuarios);
-    let ordenes = GetOrdenes(compras);
     let ventasDelDia = VentasDia(pedidos);
     let pedidosPorEnviar = PedidosPorEnviar(pedidos);
     let inventarioLow = await GetInventarioLowStock(inventarios);
+    const ventasPorMes = await GetVentasUltimosMeses(pedidos);
     res.status(200).json({
       clientes,
-      ordenes,
       ventasDelDia,
       pedidosPorEnviar,
       inventarioLow,
       donutPedidos,
-      donutCompras
+      ventasPorMes
     })
   } 
   catch(error)
@@ -455,6 +454,31 @@ const GetDashboardPedidos = async(req,res) =>{
   }
 }
 
+const GetVentasUltimosMeses = async (pedidos, meses = 5) =>{
+  
+  const today = new Date();
+  const firstDayOfFourMonthsAgo = new Date(today.getFullYear(), today.getMonth() - (meses - 1), 1);
+
+  const pedidosFiltrados = pedidos.filter((pedido) => {
+    const fecha = new Date(pedido.fechaRegistro);
+    return fecha >= firstDayOfFourMonthsAgo && fecha < today;
+  });
+
+  const ventasPorMes = pedidosFiltrados.reduce((acc, pedido) => {
+    const fecha = new Date(pedido.fechaRegistro);
+    const mes = fecha.toLocaleString('default', { month: 'short' }).replace('.', ''); 
+    if (!acc[mes]) acc[mes] = 0;
+    acc[mes] += pedido.precioVenta; 
+    return acc;
+  }, {});
+
+  const resultado = Object.entries(ventasPorMes).map(([mes, total]) => [
+    mes,
+    parseFloat(total.toFixed(2))
+  ]);
+
+  return resultado;
+}
 
 const GetDonutPedidos = (pedidos)=>{
   let donutPedidos = new Object();
@@ -490,34 +514,34 @@ const GetDonutPedidos = (pedidos)=>{
   return donutPedidos;
 }
 
-const GetDonutCompras = (compras)=>{
-  let donutCompras = new Object();
-  let compraCotizado = 0;
-  let compraProcesado = 0;
-  let compraAnulado = 0;
-  let compraFinalizado = 0;
-  for(var i=0; i<compras.length;i++){
-    switch(compras[i].estado){
-      case "cotizado":
-        compraCotizado++;
-        break;
-      case "procesado":
-        compraProcesado++;
-        break;
-      case "finalizado":
-        compraFinalizado++;
-        break;
-      case "anulado":
-        compraAnulado++;
-        break;
-    }
-  }
-  donutCompras.compraCotizado = compraCotizado;
-  donutCompras.compraProcesado = compraProcesado;
-  donutCompras.compraAnulado = compraAnulado;
-  donutCompras.compraFinalizado = compraFinalizado;
-  return donutCompras;
-}
+// const GetDonutCompras = (compras)=>{
+//   let donutCompras = new Object();
+//   let compraCotizado = 0;
+//   let compraProcesado = 0;
+//   let compraAnulado = 0;
+//   let compraFinalizado = 0;
+//   for(var i=0; i<compras.length;i++){
+//     switch(compras[i].estado){
+//       case "cotizado":
+//         compraCotizado++;
+//         break;
+//       case "procesado":
+//         compraProcesado++;
+//         break;
+//       case "finalizado":
+//         compraFinalizado++;
+//         break;
+//       case "anulado":
+//         compraAnulado++;
+//         break;
+//     }
+//   }
+//   donutCompras.compraCotizado = compraCotizado;
+//   donutCompras.compraProcesado = compraProcesado;
+//   donutCompras.compraAnulado = compraAnulado;
+//   donutCompras.compraFinalizado = compraFinalizado;
+//   return donutCompras;
+// }
 
 const GetClientes = async(usuarios) =>{
   let rol = await Rol.findOne({nombre:"Cliente"}).exec();
@@ -530,15 +554,15 @@ const GetClientes = async(usuarios) =>{
   return clientes;
 }
 
-const GetOrdenes = (compras) => {
-  let ordenes =0;
-  for(var i=0; i<compras.length;i++){
-    if(compras[i].estado == "procesado"){
-      ordenes++;
-    }
-  }
-  return ordenes;
-}
+// const GetOrdenes = (compras) => {
+//   let ordenes =0;
+//   for(var i=0; i<compras.length;i++){
+//     if(compras[i].estado == "procesado"){
+//       ordenes++;
+//     }
+//   }
+//   return ordenes;
+// }
 
 const PedidosPorEnviar = (pedidos) =>{
   let porEnviar =0;

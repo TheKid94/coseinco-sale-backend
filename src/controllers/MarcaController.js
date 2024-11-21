@@ -39,4 +39,25 @@ const getOne = (req, res) =>{
     });
 };
 
-module.exports = { getAll, getOne };
+const createMarca = async (req, res) => {
+    try{
+        const marca = req.body.marca;
+        if(Object.keys(marca).length == 0){
+            return res.status(400).json({
+                status: 'warning',
+                status: 'Debe ingresar una marca correcta'
+            });
+        }
+        const marcares = await Marca.create(marca);
+        res.status(200).json({
+            status: 'success',
+            marcares
+        })
+    }catch(error){
+        res.status(500).json({
+            message: `Error al realizar la peticion ${err}`
+        })
+    }
+}
+
+module.exports = { getAll, getOne, createMarca };

@@ -8,13 +8,16 @@ const DatosSchema = new Schema({
     numeroDocumento: String,
     correo: String,
     fechaNacimiento: Date,
-    direccion:String
+    direccion:String,
+    placa: String,
+    brevete: String
 }, { _id: false });
 
 const Usuario = new Schema({
     nombreUsuario : String, 
     rolID : String, 
-    password : String, 
+    password : String,
+    estado: String, 
     datos : DatosSchema   
 },{
     versionKey: false

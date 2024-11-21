@@ -21,6 +21,30 @@ const getAll = (req, res) => {
   });
 };
 
+const getAdminroles = (req, res) => {
+  Rol.find({}, (err, roles) => {
+    if (err) {
+      return res.status(500).json({
+        message: `Error al realizar la peticion: ${err}`
+      });
+    }
+
+    if (!roles) {
+      return res.status(404).json({
+        message: "No existen los roles",
+      });
+    }
+
+    const adminRoles = roles.filter(rol => rol.nombre != 'Cliente');
+
+    res.status(200).json({
+      status: "success",
+      adminRoles
+    });
+  });
+};
+
 module.exports = {
-    getAll
+    getAll,
+    getAdminroles
 }
