@@ -63,15 +63,14 @@ const getLogin = async (req, res) =>{
         }
 
         const rol  = await Rol.findById(user.rolID);
-
-        console.log("rol",rol);
         const allowedRoles = ["Administrador", "Jefe Almacen", "Gerente"];
 
+        const userObject = user.toObject();
+        userObject.nombre = rol.nombre;
         // Verifica si al menos uno de los roles del usuario está permitido
         const hasAllowedRole = allowedRoles.some(
             allowedRole => allowedRole.toLowerCase() === rol.nombre.toLowerCase()
         );
-        console.log(hasAllowedRole);
 
         if (!hasAllowedRole) {
             return res.status(403).json({
@@ -79,14 +78,14 @@ const getLogin = async (req, res) =>{
             });
         }
 
-        const accessToken = jwt.sign({ userId: user.id }, JWT_SECRET, {
+        const accessToken = jwt.sign({ userId: userObject.id }, JWT_SECRET, {
             expiresIn: JWT_VALIDITY,
         })
 
         res.status(200).json({
             status: 'success',
             accessToken,
-            user
+            user: userObject
         });
     }catch(err){
         res.status(500).json({
