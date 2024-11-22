@@ -7,6 +7,14 @@ const MovimientoSalida = require('../models/MovimientoSalida');
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 
+const fs = require('fs');
+const path = require('path');
+const utils = require('util');
+const readFile = utils.promisify(fs.readFile);
+
+const postmark = require("postmark");
+const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY);
+
 const createEnvio = async(req, res) => {
     try{
         let pedidoID = req.body.pedidoID;
@@ -67,6 +75,8 @@ const createEnvio = async(req, res) => {
         envio.pedidoID = pedidoID;
         envio.nomEncargado = nomEncargado;
         envio.fechaEnvio = Date.now();
+        console.log(pedido);
+        await NotificarClienteEnvio(pedido);
         let envioNew = await Envio.create(envio);
         await Pedido.findOneAndUpdate({_id: pedidoID}, {estado:"enviado"});
         res.status(201).json({
@@ -79,6 +89,27 @@ const createEnvio = async(req, res) => {
         })
     }
 }
+
+async function getTemplateMessageEnvioHtml(){
+    console.log("Loading template file in memory");
+    try {
+      const invoicePath = path.resolve("src/public/templates/messageEnvio.html");
+      return await readFile(invoicePath, 'utf8');
+    } catch (err) {
+      throw new Error("Could not load html template");
+    }
+}
+
+const NotificarClienteEnvio = async (pedido) => {
+    const messageEnvio = await getTemplateMessageEnvioHtml();
+    await client.sendEmail({
+        From: "gustavo.troncos@urp.edu.pe",
+        To: pedido.datos.email,
+        Subject: `Envio de pedido ${pedido.codigoPedido}`,
+        HtmlBody: messageEnvio,
+        MessageStream: "broadcast"
+    });
+};
 
 module.exports = {
     createEnvio
