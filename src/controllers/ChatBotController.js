@@ -10,14 +10,22 @@ const getPedidoByNumberDoc = async(req,res)=>{
     try
     {
         let pedido = await Pedido.findOne({ codigoPedido: numPedido, 'datos.numberDoc': numDoc});
-        let detallePedido = await DetallePedido.findOne({ pedidoID: pedido._id});
-        let envioPedido = await Envio.findOne({ pedidoID: pedido._id});
+
         if(!pedido)
         {
             return res.status(404).json({
                 message: 'No existe el pedido o el numero de documento es invalido al pedido'
             })
         }
+
+        let detallePedido = await DetallePedido.findOne({ pedidoID: pedido._id});
+        if (!detallePedido) {
+            return res.status(404).json({
+              message: 'No se encontraron detalles para este pedido'
+            });
+          }
+
+        let envioPedido = await Envio.findOne({ pedidoID: pedido._id});
 
         res.status(200).json({
             status: 'success',
@@ -70,12 +78,12 @@ const getProductoBySKU = async(req,res)=>{
 const getProductosByCategoriaId = async(req,res)=>{
     let categoriaId = req.body.categoriaId;
     try {
-        const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }, 'productoID').exec();
-        const productoIdsConStock = inventarioConStock.map(item => item.productoID);
+        //const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }, 'productoID').exec();
+        //const productoIdsConStock = inventarioConStock.map(item => item.productoID);
 
         const productosDisponibles = await Producto.find({
             categoriaID: categoriaId,
-            _id: { $in: productoIdsConStock }
+            //_id: { $in: productoIdsConStock }
         });
 
         if (productosDisponibles.length === 0) {
