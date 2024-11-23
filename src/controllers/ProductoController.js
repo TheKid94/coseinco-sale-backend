@@ -10,45 +10,69 @@ cloudinary.config({
 });
 
 
-const getOne = (req, res) => {
+const getOne = async (req, res) => {
+    try {
 
-    const id = req.params.id;
-    Producto.findById(id,(err,producto)=>{
-        if(err){
-            return res.status(500).json({
-                message: `Error al realizar la peticion ${err}`
-            })
-        }
-        if(!producto){
-            return res.status(404).json({
-                message: 'No existe el producto'
-            })
-        }
+        const id = req.params.id;
+
+        const productoTemp = await Producto.findById(id);
+
+        const inventarioConStock = await Inventario.findOne({ productoID: id }).exec();
+
+        let producto = new Object();
+        producto._id = id,
+        producto.marcaID = productoTemp.marcaID,
+        producto.SKU = productoTemp.SKU,
+        producto.nombre = productoTemp.nombre,
+        producto.precio = parseFloat(productoTemp.precio),
+        producto.codigoFabricante = productoTemp.codigoFabricante,
+        producto.caracteristica = productoTemp.caracteristica,
+        producto.imagenes = productoTemp.imagenes,
+        producto.categoriaID = productoTemp.categoriaID,
+        producto.estado = "habilitado",
+        producto.stock = inventarioConStock.stock
+
+        console.log(producto);
+
         res.status(200).json({
             status: 'success',
             producto
         });
-    });
-
+    }
+    catch (err) {
+        res.status(500).json({
+            message: `Error al realizar la petición: ${err}`
+        });
+        }
 };
 
-const getAll = (req, res)=>{
-    Producto.find({},(err, products)=>{
-        if(err){
-            return res.status(500).json({
-                message: `Error al realizar la petición: ${err}`
-            });
-        }
-        if(!products){
+const getAll = async (req, res)=>{
+    try {      
+        const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }).exec();
+        const productoIdsConStock = inventarioConStock.map(item => item.productoID);
+        if (productoIdsConStock.length === 0) {
             return res.status(404).json({
-                message: 'No existen productos'
+                message: 'No hay productos con stock disponible.'
             });
         }
+
+        const filtro = {
+            _id: { $in: productoIdsConStock },
+            estado: 'habilitado'
+        };        
+
+        const products = await Producto.find(filtro).exec();
+
         res.status(200).json({
             status: 'success',
-            products,
+            products
         });
-    });
+    }
+    catch (err) {
+        res.status(500).json({
+            message: `Error al realizar la petición: ${err}`
+        });
+        }
 };
 
 const getAllCatalogo = async (req, res) => {
@@ -75,18 +99,19 @@ const getAllCatalogo = async (req, res) => {
         // Calcular el número de documentos a omitir
         const skip = (page - 1) * limit;
 
-        // Paso 1: Obtener los IDs de productos con stock > 0 || No necesitamos validar stock
-        /*const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }).exec();
+        // Paso 1: Obtener los IDs de productos con stock > 0
+        const inventarioConStock = await Inventario.find({ stock: { $gt: 0 } }).exec();
         const productoIdsConStock = inventarioConStock.map(item => item.productoID);
 
         if (productoIdsConStock.length === 0) {
             return res.status(404).json({
                 message: 'No hay productos con stock disponible.'
             });
-        }*/
+        }
 
-        // Construir el objeto de filtro para la colección Producto || _id: { $in: productoIdsConStock },
+        // Construir el objeto de filtro para la colección Producto
         const filtro = {
+            _id: { $in: productoIdsConStock },
             precio: { $gte: minVal, $lte: maxVal },
             estado: 'habilitado'
         };
