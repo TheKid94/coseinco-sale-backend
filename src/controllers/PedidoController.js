@@ -156,8 +156,8 @@ const generarFilePago = async (pedido, detallePedido) => {
 
     reshtml = reshtml.replace('#TipoDeDoc', pedido.datos.documentType == 'RUC' ? 'Factura de Venta' : 'Boleta de Venta');
     reshtml = reshtml.replace('#CodigoVenta', pedido.codigoPedido);
-    reshtml = reshtml.replace('#FechaRegistro', `${fechaReg.getDate() + 1}/${fechaReg.getMonth() + 1}/${fechaReg.getFullYear()}`);
-    reshtml = reshtml.replace('#FechaLlegada', `${fechaEnt.getDate() + 1}/${fechaEnt.getMonth() + 1}/${fechaEnt.getFullYear()}`);
+    reshtml = reshtml.replace('#FechaRegistro', `${fechaReg.getDate()}/${fechaReg.getMonth() + 1}/${fechaReg.getFullYear()}`);
+    reshtml = reshtml.replace('#FechaLlegada', `${fechaEnt.getDate()}/${fechaEnt.getMonth() + 1}/${fechaEnt.getFullYear()}`);
     reshtml = reshtml.replace('#Cliente', `${pedido.datos.name} ${pedido.datos.lastName}`);
     reshtml = reshtml.replace('#Correo', pedido.datos.email);
     reshtml = reshtml.replace('#TipoDocumento', pedido.datos.documentType);
@@ -251,13 +251,12 @@ const EnviarPedido = async(req, res) =>{
   let docConfirm = req.body.doc;
   try{
     let pedido = await Pedido.findOne({codigoPedido: codigoPedido});
-
     const resultado = await MovimientoSalida.updateMany(
       { pedidoID: pedido._id }, // Condición
       { $set: { archivosAdjuntos: docConfirm } } // Actualización
   );
 
-    await Pedido.findOneAndUpdate({codigoPedido:codigoPedido}, {estado:"finalizado"})
+    await Pedido.findOneAndUpdate({codigoPedido:codigoPedido}, {estado:"finalizado", fechaEntrega: new Date()})
     await Envio.findOneAndUpdate({pedidoID: pedido._id},{constanciaEnvio: docConfirm})
     res.status(200).json({
       status: "success",
