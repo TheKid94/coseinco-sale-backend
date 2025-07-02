@@ -7,7 +7,8 @@ const DetallePedido = require('../models/DetallePedido');
 const MovimientoSalida = require('../models/MovimientoSalida');
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
-
+const hb = require('handlebars');
+const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const utils = require('util');
@@ -76,7 +77,7 @@ const createEnvio = async(req, res) => {
 
             movimientoSalidaList.push(movimiento);
         }
-        let archivoRemision = ProcesarGuiaRemisionUrl(guia, pedido);
+        let archivoRemision = await ProcesarGuiaRemisionUrl(guia, pedido);
         await MovimientoSalida.insertMany(movimientoSalidaList);
 
         let nomEncargado = req.body.nomEncargado;
